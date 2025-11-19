@@ -1,0 +1,32 @@
+-- Get-ChildItem ConstructTheReals -Recurse -Filter *.lean | % { "import " + ($_.FullName -replace '\\','/' -replace '^.*ConstructTheReals/','ConstructTheReals/' -replace '\.lean$','' -replace '/','.') }
+
+import ConstructTheReals.Cat
+import ConstructTheReals.Constructions.ENat
+import ConstructTheReals.Constructions.Integer
+import ConstructTheReals.Constructions.Natural
+import ConstructTheReals.Constructions.Rational
+import ConstructTheReals.Constructions.Real
+import ConstructTheReals.GroupTheory.Action
+import ConstructTheReals.GroupTheory.Center
+import ConstructTheReals.GroupTheory.CyclicGroup
+import ConstructTheReals.GroupTheory.DifferenceGroup
+import ConstructTheReals.GroupTheory.DihedralGroup
+import ConstructTheReals.GroupTheory.Generators
+import ConstructTheReals.GroupTheory.Group
+import ConstructTheReals.GroupTheory.Magma
+import ConstructTheReals.GroupTheory.Monoid
+import ConstructTheReals.GroupTheory.NormalSubgroup
+import ConstructTheReals.GroupTheory.Pointed
+import ConstructTheReals.GroupTheory.SymmetricGroup
+import ConstructTheReals.RingTheory.Fibonacci
+import ConstructTheReals.RingTheory.Field
+import ConstructTheReals.RingTheory.Localization
+import ConstructTheReals.RingTheory.Module
+import ConstructTheReals.RingTheory.Ring
+import ConstructTheReals.RingTheory.VectorSpace
+import ConstructTheReals.SetTheory.Function
+import ConstructTheReals.SetTheory.Logic
+import ConstructTheReals.SetTheory.Operation
+import ConstructTheReals.SetTheory.Relation
+import ConstructTheReals.SetTheory.Subset
+import ConstructTheReals.Topology.MetricSpace

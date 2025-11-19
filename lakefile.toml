@@ -1,0 +1,6 @@
+name = "ConstructTheReals"
+version = "0.1.0"
+defaultTargets = ["ConstructTheReals"]
+
+[[lean_lib]]
+name = "ConstructTheReals"
