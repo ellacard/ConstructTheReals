@@ -1,5 +1,5 @@
 import ConstructTheReals.Function
-import ConstructTheReals.Subset
+import ConstructTheReals.Set
 
 variable {α: Type u} {β: Type v} {γ: Type w}
 

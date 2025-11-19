@@ -16,4 +16,4 @@ import ConstructTheReals.Rational
 import ConstructTheReals.Real
 import ConstructTheReals.Relation
 import ConstructTheReals.Ring
-import ConstructTheReals.Subset
+import ConstructTheReals.Set
