@@ -3,13 +3,13 @@ import ConstructTheReals.Magma
 
 variable {α: Type u₁} {β: Type u₂}
 
-
-
 /-
 
 A monoid is a set with:
 - a "pointed" structure, i.e. a distinguished point 0,
-- a magma structure with a binary operation,
+- a magma structure, i.e. a binary operation.
+
+where:
 - 0 is an identity for the operation,
 - the operation is associative.
 
@@ -19,13 +19,13 @@ class Monoid (α: Type u) extends Pointed α, Magma α where
   identity: Identity op unit
   assoc: Associative op
 
-
+class CommMonoid (α: Type u) extends Monoid α, CommMagma α
 
 -- Introduce `+` and `0` notation to the monoid namespace.
 
 namespace Monoid
 scoped instance [Magma α]: Add α := ⟨op⟩
-scoped instance [Pointed α]: Zero α := ⟨unit⟩
+scoped instance [Pointed α]: Zero α := ⟨Pointed.unit⟩
 
 def ngen [Monoid α] (n: Nat) (a: α): α :=
   match n with
@@ -35,10 +35,7 @@ def ngen [Monoid α] (n: Nat) (a: α): α :=
 instance [Monoid α]: SMul Nat α := ⟨ngen⟩
 
 end Monoid
-
 open Monoid
-
-
 
 -- Unpack axioms with notation.
 
@@ -54,19 +51,10 @@ theorem op_assoc [Monoid α] (a b c: α): a + b + c = a + (b + c) := by
 def inverses [Monoid α] (a b: α): Prop :=
   Inverses op a b unit
 
-def inverses_iff [Monoid M] (a b: M): inverses a b ↔ a + b = 0 ∧ b + a = 0 := by
+def inverses_iff [Monoid α] (a b: α): inverses a b ↔ a + b = 0 ∧ b + a = 0 := by
   rfl
 
-/-
-In a monoid we can define multiplication by natural numbers via
-0 • a = 0
-1 • a = a
-2 • a = a + a
-etc.
--/
-
-theorem ngen_zero' [Monoid α] (a: α): 0 • a = 0 := by
-  rfl
+-- Define natural multiplication in a monoid.
 
 theorem ngen_zero [Monoid α] (a: α): 0 • a = (0: α) := by
   rfl
@@ -118,68 +106,7 @@ theorem left_right_inverse_eq [Monoid α] {a b c: α}
     _ = 0 + c       := by rw [h₁]
     _ = c           := by rw [op_unit_left]
 
--- On any type α the set of functions α → α is a monoid,
--- with composition in either order.
-
-instance Monoid.endo.left (α: Type u): Monoid (α → α) := {
-  op := λ f g ↦ f ∘ g
-  unit := Function.id
-  identity := by constructor <;> exact congrFun rfl
-  assoc := by intro _ _ _ ; rfl
-}
-
-instance Monoid.endo.right (α: Type u): Monoid (α → α) := {
-  op := λ f g ↦ g ∘ f
-  unit := Function.id
-  identity := by constructor <;> exact congrFun rfl
-  assoc := by intro _ _ _ ; rfl
-}
-
--- Lists form a monoid, the "free" monoid.
-
-def Monoid.free (α: Type u): Monoid (List α) := {
-  op := List.append
-  unit := List.nil
-  identity := by constructor <;> simp [LeftIdentity, RightIdentity]
-  assoc := by intro; simp
-}
-
-
-class CommMonoid (α: Type u) extends Monoid α, CommMagma α
-
-
-example: CommMonoid Nat := {
-  op := Nat.add
-  unit := 0
-  identity := ⟨Nat.zero_add, Nat.add_zero⟩
-  assoc := Nat.add_assoc
-  comm := Nat.add_comm
-}
-
-example: CommMonoid Nat := {
-  op := Nat.mul
-  unit := 1
-  identity := ⟨Nat.one_mul, Nat.mul_one⟩
-  assoc := Nat.mul_assoc
-  comm := Nat.mul_comm
-}
-
-example (α: Type u): CommMonoid (Set α) := {
-  op := Set.union
-  unit := Set.empty
-  identity := by exact Set.union_identity
-  assoc := by exact Set.union_assoc
-  comm := by exact Set.union_comm
-}
-
-example (α: Type u): CommMonoid (Set α) := {
-  op := Set.inter
-  unit := Set.full
-  identity := by exact Set.inter_identity
-  assoc := by exact Set.inter_assoc
-  comm := by exact Set.inter_comm
-}
-
+-- A monoid homomorphism preserves the unit and the binary operation.
 
 class Monoid.hom (M₁: Monoid α) (M₂: Monoid β) extends
   toPointedHom: Pointed.hom M₁.toPointed M₂.toPointed,
@@ -188,6 +115,8 @@ class Monoid.hom (M₁: Monoid α) (M₂: Monoid β) extends
 instance Monoid.hom.coeFun [M₁: Monoid α] [M₂: Monoid β]: CoeFun (Monoid.hom M₁ M₂) (λ _ ↦ α → β) := {
   coe f := f.map
 }
+
+-- A submonoid is a subset which contains the unit and is closed under the operation.
 
 class Monoid.sub (M: Monoid α) (S: Set α) extends
   toPointedSub: M.toPointed.sub S,
@@ -198,22 +127,12 @@ theorem Monoid.full_sub (M: Monoid α): M.sub Set.full := {
   op_closed := sorry
 }
 
+-- The image of a monoid homomorphism is a submonoid.
+
 theorem Monoid.hom.image_sub {M₁: Monoid α} {M₂: Monoid β} (f: hom M₁ M₂): M₂.sub (Set.range f) := {
   unit_mem := (Pointed.hom.image_sub f.toPointedHom).unit_mem
   op_closed := (Magma.hom.image_sub f.toMagmaHom).op_closed
 }
-
-theorem Monoid.kernel_sub {M₁: Monoid α} {M₂: Monoid β} (f: hom M₁ M₂): M₁.sub f.kernel := {
-  unit_mem := f.unit_preserving
-  op_closed := by
-    intro x y hx hy
-    calc
-      f (x + y)
-      _ = f x + f y := by rw [f.op_preserving]
-      _ = 0 + 0 := by rw [hx, hy]
-      _ = 0 := by rw [op_unit_left]
-}
-
 
 def Monoid.opposite (M: Monoid α): Monoid α := {
   op := M.toMagma.opposite.op

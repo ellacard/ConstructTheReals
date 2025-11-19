@@ -2,11 +2,9 @@ import ConstructTheReals.Monoid
 
 variable {α: Type u} {β: Type v} {γ: Type w}
 
-
-
 /-
 
-A group is a monoid with inverses.
+A group is a monoid where every element has an inverse.
 
 -/
 
@@ -16,12 +14,11 @@ class Group (α: Type u) extends Monoid α where
 
 class CommGroup (α: Type u) extends Group α, CommMonoid α
 
-
-
-
 -- Introduces notation +, 0, and - for groups.
+
 export Group (inv)
 namespace Group
+
 scoped instance [Magma α]: Add α := ⟨op⟩
 scoped instance [Pointed α]: Zero α := ⟨unit⟩
 scoped instance [Group α]: Neg α := ⟨inv⟩
@@ -33,11 +30,9 @@ def zgen [Group α] (k: Int) (a: α): α :=
   | Int.ofNat n => n • a
   | Int.negSucc n => n.succ • -a
 instance [Group α]: SMul Int α := ⟨zgen⟩
+
 end Group
-
 open Group
-
-
 
 -- Unpacking axioms with notation.
 
@@ -100,8 +95,7 @@ theorem inv_invop [Group α] (a b: α): -(a - b) = b - a := by
     _ = a + -a              := by rw [op_unit_left]
     _ = 0                   := by rw [op_inv_right]
 
--- In a group we can define integer multiplication via
--- 0 * a = 0, 1 * a = a, 2 * a = a + a, ... and -1 * a = 1 * -a, -2 * a = 2 * (-a), ...
+-- Define integer multiplication in a group.
 
 theorem ngen_neg_left [Group α] (a: α) (n: Nat): n • (-a) + n • a = 0 := by
   apply ngen_inverses n
@@ -142,8 +136,6 @@ theorem zgen_neg [Group α] (a: α) (n: Int): n • (-a) = -n • a := by
     _ = -Int.ofNat p • a := sorry
   | negSucc p => sorry
 
-
-
 theorem square_self_zero [Group α] {a: α} (h: 2 • a = a): a = 0 := by
   calc
     a
@@ -156,6 +148,7 @@ theorem square_self_zero [Group α] {a: α} (h: 2 • a = a): a = 0 := by
 
 
 -- "Socks shoes" property
+
 theorem inv_op [Group α] (a b: α): -(a + b) = -b + -a := by
   repeat rw [←neg_eq]
   apply op_cancel_right (c := (a + b))
@@ -169,8 +162,6 @@ theorem inv_op [Group α] (a b: α): -(a + b) = -b + -a := by
     _ = -b + b              := by rw [op_unit_left]
     _ = 0                   := by rw [op_inv_left]
 
-
-
 -- A group homomorphism is a monoid homomorphism which also preserves inverses.
 
 class Group.hom (G₁: Group α) (G₂: Group β)
@@ -181,11 +172,10 @@ instance Group.hom.coeFun [G₁: Group α] [G₂: Group β]: CoeFun (Group.hom G
   coe f := f.map
 }
 
--- A subgroup is a submonoid which is also closed under inverses.
+-- A subgroup is a submonoid which is also closed under inverse.
 
 class Group.sub (G: Group α) (S: Set α) extends G.toMonoid.sub S where
   inv_closed: ∀ a, a ∈ S → -a ∈ S
-
 
 -- The image of a group homomorphism is a subgroup.
 
@@ -196,20 +186,6 @@ theorem Group.hom.image_sub (G₁: Group α) (G₂: Group β) (f: hom G₁ G₂)
     intro _ ⟨a, ha⟩
     rw [←ha, ←f.inv_preserving]
     apply Set.range_mem
-}
-
--- The kernel is a subgroup.
-
-theorem Group.kernel_sub (G₁: Group α) (G₂: Group β) (f: hom G₁ G₂): G₁.sub f.kernel := {
-  unit_mem := (Monoid.kernel_sub f.toMonoidHom).unit_mem
-  op_closed := (Monoid.kernel_sub f.toMonoidHom).op_closed
-  inv_closed := by
-    intro x hx
-    calc
-      f (-x)
-      _ = -(f x) := by rw [f.inv_preserving]
-      _ = -0 := by rw [hx]
-      _ = 0 := by rw [inv_unit]
 }
 
 -- The opposite group.

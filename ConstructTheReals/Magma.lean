@@ -3,34 +3,20 @@ import ConstructTheReals.Set
 
 variable {α: Type u} {β: Type v} {γ: Type w}
 
-/-
-
-A magma is just a set with an operation.
-
--/
-
 class Magma (α: Type u) where
   op: α → α → α
 
 class CommMagma (α: Type u) extends Magma α where
   comm: Commutative op
 
-
-
-
 export Magma (op)
 namespace Magma
 scoped instance [Magma α]: Add α := ⟨op⟩
 end Magma
-
 open Magma
-
-
 
 theorem op_comm [CommMagma α] (a b: α): a + b = b + a := by
   exact CommMagma.comm a b
-
-
 
 -- A magma homomorphism preserves the operation.
 
@@ -51,7 +37,6 @@ def Magma.hom.comp {M₁: Magma α} {M₂: Magma β} {M₃: Magma γ} (f: hom M�
   map := g ∘ f
   op_preserving := by intros; simp [f.op_preserving, g.op_preserving]
 }
-
 
 -- A submagma is a subset which is closed under the operation.
 

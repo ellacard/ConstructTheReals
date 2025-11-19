@@ -89,8 +89,8 @@ instance [Semiring α]: HPow α Nat α := ⟨flip Semiring.toMulMonoid.ngen⟩
 instance [Semiring α]: SMul Nat α   := ⟨Semiring.toAddMonoid.ngen⟩
 instance [Ring α]: SMul Int α   := ⟨Group.zgen⟩
 
-
 -- Unpacking axioms with notation.
+
 theorem add_assoc [Semiring α] (a b c: α): a + b + c = a + (b + c) := by
   apply @op_assoc _ Semiring.toAddMonoid.toMonoid
 
@@ -136,6 +136,9 @@ theorem neg_sub' [Ring α] (a b: α): -(a - b) = -a + b := by
 theorem neg_zero [Ring α]: -(0: α) = 0 := by
   apply inv_unit
 
+theorem mul_comm [CommRing α] (a b: α): a * b = b * a := by
+  apply CommRing.mul_comm
+
 -- nmul and npow
 
 theorem nmul_zero [Semiring α] (a: α): 0 • a = 0 := by
@@ -154,6 +157,7 @@ theorem npow_one [Semiring α] (a: α): a^1 = a := by
   apply ngen_one
 
 -- Basic theorems
+
 theorem sub_zero_iff [Ring α] {a b: α}: a - b = 0 ↔ a = b := by
   constructor
   · intro h
@@ -214,6 +218,7 @@ theorem distrib_sub_right [Ring α] (a b c: α): (a - b) * c = a * c - b * c := 
     _ = a * c + -(b * c) := by rw [mul_neg_left]
 
 -- If 0 = 1 the ring is trivial (singleton).
+
 theorem zero_eq_one_trivial [Ring α] (h: (0: α) = 1): ∀ a b: α, a = b := by
   intro a b
   calc
@@ -225,11 +230,7 @@ theorem zero_eq_one_trivial [Ring α] (h: (0: α) = 1): ∀ a b: α, a = b := by
     _ = 1 * b := by rw [h]
     _ = b     := by rw [mul_one_left]
 
-
-theorem mul_comm [CommRing α] (a b: α): a * b = b * a := by
-  apply CommRing.mul_comm
-
-
+-- Integral domain
 
 def Semiring.NoZeroDivisors {α: Type u} [Semiring α]: Prop :=
   ∀ a b: α, a ≠ 0 → b ≠ 0 → a * b ≠ 0
