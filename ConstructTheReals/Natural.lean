@@ -3,7 +3,7 @@ import ConstructTheReals.Relation
 
 /-
 
-Construction of the natural numbers from scratch.
+Construction of the natural numbers.
 
 Want to show:
 1. (additive structure)
@@ -42,6 +42,10 @@ def one: ℕ :=
 
 instance: One ℕ := ⟨one⟩
 
+
+
+-- Show (ℕ, +) is a cancellative commutative monoid.
+
 def add (a b: ℕ): ℕ :=
   match b with
   | zero => a
@@ -49,20 +53,17 @@ def add (a b: ℕ): ℕ :=
 
 instance: Add ℕ := ⟨add⟩
 
-def le (a b: ℕ): Prop :=
-  ∃ d, a + d = b
-
-instance: LE ℕ := ⟨le⟩
-
-
-
--- Show (ℕ, +) is a cancellative commutative monoid.
-
 theorem add_next_left {a b: Natural}: a.next + b = (a + b).next := by
-  sorry
+  induction b with
+  | zero => rfl
+  | next p hp =>
+    sorry
 
 theorem add_next_right {a b: Natural}: a + b.next = (a + b).next := by
-  sorry
+  induction a with
+  | zero => rfl
+  | next p hp =>
+    sorry
 
 theorem next_eq_iff {a b: Natural}: a = b ↔ a.next = b.next := by
   constructor
@@ -130,39 +131,75 @@ def mul (a b: ℕ): ℕ :=
 
 instance: Mul ℕ := ⟨mul⟩
 
+theorem mul_one_left (a: ℕ): one * a = a := by
+  induction a with
+  | zero => rfl
+  | next p hp => exact Eq.symm (congrArg next (Eq.symm hp))
+
+theorem mul_one_right (a: ℕ): a * one = a := by
+  induction a with
+  | zero => rfl
+  | next p hp => exact Eq.symm (congrArg next (Eq.symm hp))
+
+theorem mul_zero_left (a: ℕ): zero * a = zero := by
+  induction a with
+  | zero => rfl
+  | next p hp => exact hp
+
+theorem mul_zero_right (a: ℕ): a * zero = zero := by
+  induction a with
+  | zero => rfl
+  | next p hp => exact hp
+
+theorem mul_next_left (a b: ℕ): a.next * b = a * b + b := by
+  sorry
+
+theorem mul_next_right (a b: ℕ): a * b.next = a + a * b := by
+  sorry
+
 theorem mul_assoc (a b c: ℕ): a * b * c = a * (b * c) := by
   sorry
 
-theorem mul_one_left (a: ℕ): 1 * a = a := by
-  sorry
-
-theorem mul_one_right (a: ℕ): a * 1 = a := by
-  sorry
-
 theorem mul_comm (a b: ℕ): a * b = b * a := by
-  sorry
+  induction a with
+  | zero => rw [mul_zero_left, mul_zero_right]
+  | next p hp => rw [mul_next_left, mul_next_right, hp, add_comm]
 
 theorem mul_cancel_left {a b c: ℕ} (h: a * b = a * c) (ha: a ≠ 0): b = c := by
-  sorry
+  induction a with
+  | zero => contradiction
+  | next p hp =>
+    sorry
 
 theorem mul_cancel_right {a b c: ℕ} (h: a + c = b + c) (hc: c ≠ 0): a = b := by
-  sorry
+  induction c with
+  | zero => contradiction
+  | next p hp =>
+    sorry
 
 
 
 -- Show (ℕ, +, *) is a semiring
 
 theorem distrib_left (a b c: ℕ): a * (b + c) = a * b + a * c := by
-  sorry
+  induction a with
+  | zero =>
+    repeat rw [mul_zero_left]
+    rw [add_zero_left]
+  | next p hp =>
+    repeat rw [mul_next_left]
+    rw [hp]
+    sorry
 
 theorem distrib_right (a b c: ℕ): (a + b) * c = a * c + b * c := by
-  sorry
-
-theorem mul_zero_left (a: ℕ): 0 * a = 0 := by
-  sorry
-
-theorem mul_zero_right (a: ℕ): a * 0 = 0 := by
-  sorry
+  induction c with
+  | zero =>
+    repeat rw [mul_zero_right]
+    rw [add_zero_right]
+  | next p hp =>
+    repeat rw [mul_next_right]
+    rw [hp]
+    sorry
 
 instance NaturalSemiring: CommSemiring ℕ := {
   add := add
@@ -181,6 +218,11 @@ instance NaturalSemiring: CommSemiring ℕ := {
 
 
 -- Show (ℕ, ≤) is a lattice.
+
+def le (a b: ℕ): Prop :=
+  ∃ d, a + d = b
+
+instance: LE ℕ := ⟨le⟩
 
 theorem le_refl (a: ℕ): a ≤ a := by
   exists 0
