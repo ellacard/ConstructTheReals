@@ -47,35 +47,81 @@ def add (a b: ℕ): ℕ :=
   | zero => a
   | next p => next (add a p)
 
-
 instance: Add ℕ := ⟨add⟩
+
+def le (a b: ℕ): Prop :=
+  ∃ d, a + d = b
+
+instance: LE ℕ := ⟨le⟩
+
+
 
 -- Show (ℕ, +) is a cancellative commutative monoid.
 
-theorem add_assoc (a b c: ℕ): a + b + c = a + (b + c) := by
+theorem add_next_left {a b: Natural}: a.next + b = (a + b).next := by
   sorry
 
-theorem add_zero_left (a: ℕ): 0 + a = a := by
+theorem add_next_right {a b: Natural}: a + b.next = (a + b).next := by
   sorry
 
-theorem add_zero_right (a: ℕ): a + 0 = a := by
-  sorry
+theorem next_eq_iff {a b: Natural}: a = b ↔ a.next = b.next := by
+  constructor
+  · intro h
+    exact congrArg next h
+  · intro h
+    sorry
+
+theorem add_zero_left (a: ℕ): zero + a = a := by
+  induction a with
+  | zero => rfl
+  | next p hp =>
+    rw [add_next_right, hp]
+
+theorem add_zero_right (a: ℕ): a + zero = a := by
+  rfl
 
 theorem add_comm (a b: ℕ): a + b = b + a := by
-  sorry
+  induction a with
+  | zero =>
+    rw [add_zero_left, add_zero_right]
+  | next p hp =>
+    rw [add_next_left, add_next_right, hp]
+
+theorem add_assoc (a b c: ℕ): a + b + c = a + (b + c) := by
+  induction a with
+  | zero =>
+    repeat rw [add_zero_left]
+  | next p hp =>
+    repeat rw [add_next_left]
+    rw [hp]
 
 theorem add_cancel_left {a b c: ℕ} (h: a + b = a + c): b = c := by
-  sorry
+  induction a with
+  | zero =>
+    repeat rw [add_zero_left] at h
+    exact h
+  | next p hp =>
+    apply hp
+    repeat rw [add_next_left] at h
+    exact next_eq_iff.mpr h
 
 theorem add_cancel_right {a b c: ℕ} (h: a + c = b + c): a = b := by
-  sorry
+  induction c with
+  | zero =>
+    repeat rw [add_zero_right] at h
+    exact h
+  | next p hp =>
+    apply hp
+    exact next_eq_iff.mpr h
 
 theorem add_zero_eq_zero {a b: ℕ} (h: a + b = 0): a = 0 := by
   induction b with
   | zero => exact h
   | next p hp => contradiction
 
--- Show (ℕ, +) is a commutative monoid.
+
+
+-- Show (ℕ, *) is a commutative monoid.
 
 def mul (a b: ℕ): ℕ :=
   match b with
@@ -102,7 +148,9 @@ theorem mul_cancel_left {a b c: ℕ} (h: a * b = a * c) (ha: a ≠ 0): b = c := 
 theorem mul_cancel_right {a b c: ℕ} (h: a + c = b + c) (hc: c ≠ 0): a = b := by
   sorry
 
--- Compatibility
+
+
+-- Show (ℕ, +, *) is a semiring
 
 theorem distrib_left (a b c: ℕ): a * (b + c) = a * b + a * c := by
   sorry
@@ -130,10 +178,9 @@ instance NaturalSemiring: CommSemiring ℕ := {
   mul_comm := sorry
 }
 
-def le (a b: ℕ): Prop :=
-  ∃ d, a + d = b
 
-instance: LE ℕ := ⟨le⟩
+
+-- Show (ℕ, ≤) is a lattice.
 
 theorem le_refl (a: ℕ): a ≤ a := by
   exists 0
@@ -163,8 +210,7 @@ theorem le_antisymm {a b: ℕ} (h₁: a ≤ b) (h₂: b ≤ a): a = b := by
     exact add_zero_eq_zero this
   rw [←hd₂, ←hd₁, hd₁', hd₂']
   repeat rw [add_zero_right]
-
-
+  sorry
 
 theorem le_total (a b: ℕ): a ≤ b ∨ b ≤ a := by
   sorry
@@ -173,9 +219,6 @@ theorem le_bottom (a: ℕ): 0 ≤ a := by
   exists a
   exact add_zero_left a
 
-
--- 1 ≤ 3 because 1 + 2 = 3
--- then 11 ≤ 13 because 11 + 2 = 13
 theorem le_add {a b c: ℕ} (h: a ≤ b): a + c ≤ b + c := by
   have ⟨t, ht⟩ := h
   exists t
@@ -203,7 +246,6 @@ def min_symm (a b: ℕ): min a b = min b a := by
   have := not_le_le h
   contradiction
 
-
 theorem max_le_left (a b: ℕ): a ≤ max a b := by
   by_cases a ≤ b <;> simp_all [max]
   exact le_refl a
@@ -215,7 +257,6 @@ theorem max_le_right (a b: ℕ): b ≤ max a b := by
 
 theorem max_lub (a b c: ℕ) (h₁: a ≤ b) (h₂: b ≤ c): a ≤ c := by
   sorry
-
 
 instance NaturalLattice: Lattice ℕ := {
   reflexive := le_refl
