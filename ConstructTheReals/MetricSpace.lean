@@ -1,5 +1,5 @@
-import ConstructTheReals.Relation
 import ConstructTheReals.Monoid
+import ConstructTheReals.Order
 
 variable {X: Type u} {D: Type v}
 
@@ -7,8 +7,7 @@ open Monoid
 
 /-
 
-A (generalized) metric space consists of
-
+A (generalized) metric space consists of:
 - a set X
 - a set D with "distance space" structure: ordering ≤, bottom ⊥, addition +.
 - a function d: X × X → D
@@ -19,6 +18,8 @@ A (generalized) metric space consists of
 TODO: Switch sequences from Nat to ℕ.
 
 -/
+
+-- Distance space
 
 class DistanceSpace (D: Type v) where
   le: D → D → Prop
@@ -48,9 +49,10 @@ instance [DistanceSpace D]: Monoid D := {
 def DistanceComplete (D: Type v) [DistanceSpace D]: Prop :=
   ∀ d: D, ⊥ < d → ∃ r, ⊥ < r ∧ r + r ≤ d
 
--- In a distance space, the bottom element is the zero in the monoid by definition.
 theorem DistanceSpace.bottom_eq_zero [DistanceSpace D]: (⊥: D) = 0 := by
   rfl
+
+
 
 -- Metric space
 
@@ -94,8 +96,6 @@ def ConvergesTo (d: Metric X D) (a: Sequence X) (x: X): Prop :=
 def Convergent (d: Metric X D) (a: Sequence X): Prop :=
   ∃ x, ConvergesTo d a x
 
--- optional: define the limit of a convergent sequence via choose
-
 theorem constant_sequence_converges (d: Metric X D) (x: X): ConvergesTo d (λ _ ↦ x) x := by
   intro r hr
   exists 0
@@ -109,7 +109,7 @@ def tail (s: Sequence X) (t: Nat): Sequence X :=
 theorem converges_iff_tails_converge (d: Metric X D) (a: Sequence X) (x: X): ConvergesTo d a x ↔ ∀ t, ConvergesTo d (tail a t) x := by
   constructor
   · intro h t r hr
-    obtain ⟨n, hn⟩ := h r hr
+    have ⟨n, hn⟩ := h r hr
     exists n - t
     intro m hm
     apply hn (m + t)
@@ -132,6 +132,8 @@ theorem converges_iff_tail_converges (d: Metric X D) (a: Sequence X) (x: X): Con
 
 theorem not_lt_self (x: D): ¬(x < x) := by
   exact Std.Irrefl.irrefl x
+
+-- Theorems standing in for order structure.
 
 theorem le_add {x₁ x₂ y₁ y₂: D} (h₁: x₁ < y₁) (h₂: x₂ < y₂): x₁ + x₂ < y₁ + y₂ := by
   sorry
@@ -164,13 +166,8 @@ theorem limit_unique {d: Metric X D} {a: Sequence X} {x₁ x₂: X} (h₀: Dista
   apply (d.distance_bot_iff x₁ x₂).mp
   apply (eq_bot_iff (d x₁ x₂)).mpr
   intro r₀ hr₀
-  ------- need r = r₀ / 2 -------
-  obtain ⟨r, hr₁, hr₂⟩ := h₀ r₀ hr₀
-  have r: D := sorry
-  have hr₁: ⊥ < r := sorry
-  have hr₂: r₀ = r + r := sorry
-  -------------------------------
-  rw [hr₂]
+  have ⟨r, hr₁, hr₂⟩  := h₀ r₀ hr₀
+  apply lt_le_trans _ hr₂
   have ⟨n₁, hn₁⟩ := h₁ r hr₁
   have ⟨n₂, hn₂⟩ := h₂ r hr₁
   by_cases h: n₁ ≤ n₂
@@ -224,8 +221,6 @@ def is_open_set (d: Metric X D) (S: Set X): Prop :=
 
 
 
-
-
 -- Cauchy sequence
 
 def Cauchy (d: Metric X D) (a: Sequence X): Prop :=
@@ -246,6 +241,8 @@ theorem cauchy_if_convergent (h₀: DistanceComplete D) {d: Metric X D} {a: Sequ
 
 def Complete (d: Metric X D): Prop :=
   ∀ a, Cauchy d a → Convergent d a
+
+
 
 -- Given a metric space (X, d) we can build a complete metric space
 -- via the quotient on the set of Cauchy sequences
@@ -271,7 +268,7 @@ theorem CauchyRelation.equiv (hd: DistanceComplete D) (d₀: Endometric D) (hd�
     exact hr
   symm := by
     intro _ _ h r hr
-    obtain ⟨n, hn⟩ := h r hr
+    have ⟨n, hn⟩ := h r hr
     exists n
     intro m hm
     simp [d.distance_symm]
@@ -279,15 +276,13 @@ theorem CauchyRelation.equiv (hd: DistanceComplete D) (d₀: Endometric D) (hd�
   trans := by
     intro a b c h₁ h₂
     intro r hr
-    obtain ⟨r₀, hr₁, hr₂⟩ := hd r hr
-    obtain ⟨n₁, hn₁⟩ := h₁ r₀ hr₁
-    obtain ⟨n₂, hn₂⟩ := h₂ r₀ hr₁
+    have ⟨r₀, hr₁, hr₂⟩ := hd r hr
+    have ⟨n₁, hn₁⟩ := h₁ r₀ hr₁
+    have ⟨n₂, hn₂⟩ := h₂ r₀ hr₁
     exists max n₁ n₂
     intro m hm
     simp_all
-    apply le_lt_trans
-    sorry
-    sorry
+    apply lt_le_trans _ hr₂
     sorry
     -- something broke
     -- apply d.distance_triangle _ (b m)

@@ -1,5 +1,5 @@
-import ConstructTheReals.Integer
 import ConstructTheReals.Field
+import ConstructTheReals.Integer
 import ConstructTheReals.Localization
 import ConstructTheReals.MetricSpace
 

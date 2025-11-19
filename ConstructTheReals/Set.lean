@@ -102,13 +102,21 @@ theorem Set.compl_empty_iff {S: Set α}: S.compl = ∅ ↔ S = Set.full := by
     · intro
       trivial
     · intro _
-      sorry
+      by_cases hx: x ∈ S
+      · exact hx
+      · have: x ∈ S.compl := by exact hx
+        simp_all
+        contradiction
   · intro h
     funext x
     simp
     constructor
     · intro h'
-      sorry
+      by_cases hx: x ∈ S
+      · contradiction
+      · rw [h] at hx
+        have: x ∈ full := by trivial
+        contradiction
     · intro h'
       contradiction
 

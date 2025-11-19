@@ -30,8 +30,8 @@ theorem Function.invertible_id {α: Type u}: Function.invertible (@id α) := by
   exists id
 
 theorem Function.invertible_comp {f: α → β} {g: β → γ} (hf: invertible f) (hg: invertible g): invertible (g ∘ f) := by
-  obtain ⟨f', hf⟩ := hf
-  obtain ⟨g', hg⟩ := hg
+  have ⟨f', hf⟩ := hf
+  have ⟨g', hg⟩ := hg
   exists f' ∘ g'
   constructor
   exact Function.inverses_comp hf.left hg.left

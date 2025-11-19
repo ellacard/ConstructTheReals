@@ -1,5 +1,5 @@
 import ConstructTheReals.Field
-import ConstructTheReals.Relation
+import ConstructTheReals.Order
 
 /-
 
@@ -104,8 +104,6 @@ def setoid (h: M.sub β): Setoid (α × β) := {
   iseqv := equivalence h
 }
 
-
-
 def quotient (h: M.sub β): Type u :=
   Quotient (setoid h)
 
@@ -113,8 +111,10 @@ def quotient.unit (h: M.sub β): quotient h :=
   Quotient.mk _ (0, ⟨0, h.unit_mem⟩)
 
 
+
 -- Lift the operation "add" to the quotient.
 -- first define the "pre" operation on α × β then prove it lifts.
+
 def quotient.op_pre (h: M.sub β): Op (α × β) :=
   λ (a₁, ⟨b₁, h₁⟩) (a₂, ⟨b₂, h₂⟩) ↦ (a₁ + a₂, ⟨b₁ + b₂, h.op_closed b₁ b₂ h₁ h₂⟩)
 
@@ -142,7 +142,6 @@ theorem quotient.op_lifts (h: M.sub β): ∀ a b c d: (α × β), a ≈ c → b 
 
 def quotient.op (h: M.sub β): Op (quotient h) :=
   λ x y ↦ Quotient.liftOn₂ x y _ (quotient.op_lifts h)
-
 
 -- Show α / β is a commutative monoid.
 
@@ -181,6 +180,10 @@ instance Localization (h: M.sub β): CommMonoid (quotient h) := {
     · simp [op_comm]
 }
 
+
+
+-- The "full" localization on the whole monoid (i.e. the group of differences.)
+
 def setoid.full: Setoid (α × @Set.full α) :=
   setoid M.full_sub
 
@@ -205,7 +208,6 @@ theorem quotient.inv.lifts: ∀ a b: α × @Set.full α, a ≈ b → Quotient.mk
 def quotient.inv: quotient.full (α := α) → quotient.full (α := α) :=
   λ x ↦ Quotient.liftOn x _ quotient.inv.lifts
 
--- The "full" localization on the whole monoid (i.e. the group of differences.)
 def Localization.group_of_differences: CommGroup (quotient.full α) := {
   inv := quotient.inv
   inverse := by
@@ -223,6 +225,8 @@ def Localization.group_of_differences: CommGroup (quotient.full α) := {
 
 end Monoid
 
+
+
 section Additive
 
 -- The additive localizatoin.
@@ -232,6 +236,7 @@ variable {α: Type u} [R: Semiring α] {β: Set α}
 -- The "upper" operation, i.e. the multiplication when we are localizing addition.
 -- This seems to require β to be an ideal...
 -- worst case we can take β = full?
+
 def quotient.upper.op_pre (h: R.toAddMonoid.sub β): Op (α × β) :=
   λ (a₁, ⟨b₁, h₁⟩) (a₂, ⟨b₂, h₂⟩) ↦ (a₁ * a₂ + b₁ * b₂, ⟨a₁ * b₂ + a₂ * b₁, by {
     sorry
@@ -246,6 +251,7 @@ def quotient.upper.op (h: R.toAddMonoid.sub β): Op (quotient h) :=
   λ x y ↦ Quotient.liftOn₂ x y _ (quotient.upper.op_lifts h)
 
 -- The additive localization of a semiring.
+
 instance Localization.additive [R: Semiring α] (h: R.toAddMonoid.sub β): Semiring (quotient h) := {
   add       := (Localization h).op
   zero      := (Localization h).unit
@@ -260,6 +266,7 @@ instance Localization.additive [R: Semiring α] (h: R.toAddMonoid.sub β): Semir
 }
 
 -- If we localize by all elements, we get a ring.
+
 instance Localization.additive_group_of_differences [R: Semiring α]: Ring (quotient R.toAddMonoid.full_sub) := {
   neg := sorry
   add_neg := sorry

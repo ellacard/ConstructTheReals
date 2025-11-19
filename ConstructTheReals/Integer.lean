@@ -1,6 +1,5 @@
-import ConstructTheReals.Relation
-import ConstructTheReals.Natural
 import ConstructTheReals.Localization
+import ConstructTheReals.Natural
 
 /-
 

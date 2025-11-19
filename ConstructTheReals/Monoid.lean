@@ -1,5 +1,5 @@
-import ConstructTheReals.Pointed
 import ConstructTheReals.Magma
+import ConstructTheReals.Pointed
 
 variable {α: Type u₁} {β: Type u₂}
 
@@ -123,8 +123,10 @@ class Monoid.sub (M: Monoid α) (S: Set α) extends
   toMagmaSub: M.toMagma.sub S
 
 theorem Monoid.full_sub (M: Monoid α): M.sub Set.full := {
-  unit_mem := sorry
-  op_closed := sorry
+  unit_mem := trivial
+  op_closed := by
+    intros
+    trivial
 }
 
 -- The image of a monoid homomorphism is a submonoid.

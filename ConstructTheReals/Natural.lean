@@ -1,5 +1,5 @@
+import ConstructTheReals.Order
 import ConstructTheReals.Ring
-import ConstructTheReals.Relation
 
 /-
 
@@ -228,14 +228,14 @@ theorem le_refl (a: ℕ): a ≤ a := by
   exists 0
 
 theorem le_trans {a b c: ℕ} (h₁: a ≤ b) (h₂: b ≤ c): a ≤ c := by
-  obtain ⟨d₁, hd₁⟩ := h₁
-  obtain ⟨d₂, hd₂⟩ := h₂
+  have ⟨d₁, hd₁⟩ := h₁
+  have ⟨d₂, hd₂⟩ := h₂
   exists d₁ + d₂
   rw [←hd₂, ←hd₁, add_assoc]
 
 theorem le_antisymm {a b: ℕ} (h₁: a ≤ b) (h₂: b ≤ a): a = b := by
-  obtain ⟨d₁, hd₁⟩ := h₁
-  obtain ⟨d₂, hd₂⟩ := h₂
+  have ⟨d₁, hd₁⟩ := h₁
+  have ⟨d₂, hd₂⟩ := h₂
   have: a = a + (d₁ + d₂) := by calc
     a
     _ = b + d₂ := by rw [←hd₂]
