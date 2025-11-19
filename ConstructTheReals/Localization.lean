@@ -1,5 +1,5 @@
-import ConstructTheReals.RingTheory.Field
-import ConstructTheReals.SetTheory.Relation
+import ConstructTheReals.Field
+import ConstructTheReals.Relation
 
 /-
 

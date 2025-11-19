@@ -1,7 +1,7 @@
-import ConstructTheReals.Constructions.Integer
-import ConstructTheReals.RingTheory.Field
-import ConstructTheReals.RingTheory.Localization
-import ConstructTheReals.Topology.MetricSpace
+import ConstructTheReals.Integer
+import ConstructTheReals.Field
+import ConstructTheReals.Localization
+import ConstructTheReals.MetricSpace
 
 /-
 

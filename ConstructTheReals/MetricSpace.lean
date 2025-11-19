@@ -1,5 +1,5 @@
-import ConstructTheReals.SetTheory.Relation
-import ConstructTheReals.GroupTheory.Monoid
+import ConstructTheReals.Relation
+import ConstructTheReals.Monoid
 
 variable {X: Type u} {D: Type v}
 

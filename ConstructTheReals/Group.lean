@@ -1,4 +1,4 @@
-import ConstructTheReals.GroupTheory.Monoid
+import ConstructTheReals.Monoid
 
 variable {α: Type u} {β: Type v} {γ: Type w}
 

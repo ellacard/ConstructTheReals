@@ -1,4 +1,4 @@
-import ConstructTheReals.GroupTheory.Group
+import ConstructTheReals.Group
 
 variable {α: Type u}
 

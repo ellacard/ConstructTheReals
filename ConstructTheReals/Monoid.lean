@@ -1,5 +1,5 @@
-import ConstructTheReals.GroupTheory.Pointed
-import ConstructTheReals.GroupTheory.Magma
+import ConstructTheReals.Pointed
+import ConstructTheReals.Magma
 
 variable {α: Type u₁} {β: Type u₂}
 

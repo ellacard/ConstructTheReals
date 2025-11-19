@@ -1,6 +1,6 @@
-import ConstructTheReals.SetTheory.Relation
-import ConstructTheReals.Constructions.Natural
-import ConstructTheReals.RingTheory.Localization
+import ConstructTheReals.Relation
+import ConstructTheReals.Natural
+import ConstructTheReals.Localization
 
 /-
 

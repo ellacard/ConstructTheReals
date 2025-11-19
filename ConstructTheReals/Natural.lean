@@ -1,5 +1,5 @@
-import ConstructTheReals.RingTheory.Ring
-import ConstructTheReals.SetTheory.Relation
+import ConstructTheReals.Ring
+import ConstructTheReals.Relation
 
 /-
 

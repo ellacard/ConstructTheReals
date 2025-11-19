@@ -1,4 +1,4 @@
-import ConstructTheReals.SetTheory.Operation
+import ConstructTheReals.Operation
 
 variable {α: Type u} {β: Type v} {γ: Type w}
 
