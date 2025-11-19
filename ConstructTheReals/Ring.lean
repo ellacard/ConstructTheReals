@@ -169,7 +169,7 @@ theorem sub_zero_iff [Ring α] {a b: α}: a - b = 0 ↔ a = b := by
   · intro h
     rw [h, sub_self]
 
-theorem mul_zero_left [Ring α] (a: α): 0 * a = 0 := by
+theorem mul_zero_left' [Ring α] (a: α): 0 * a = 0 := by
   apply op_cancel_left
   calc
     0 * a + 0 * a
@@ -177,13 +177,19 @@ theorem mul_zero_left [Ring α] (a: α): 0 * a = 0 := by
     _ = 0 * a       := by rw [add_zero_left]
     _ = 0 * a + 0   := by rw [add_zero_right]
 
-theorem mul_zero_right [Ring α] (a: α): a * 0 = 0 := by
+theorem mul_zero_right' [Ring α] (a: α): a * 0 = 0 := by
   apply op_cancel_right
   calc
     a * 0 + a * 0
     _ = a * (0 + 0) := by rw [distrib_left]
     _ = a * 0       := by rw [add_zero_left]
     _ = 0 + a * 0   := by rw [add_zero_left]
+
+theorem mul_zero_left [Semiring α] (a: α): 0 * a = 0 := by
+  sorry
+
+theorem mul_zero_right [Semiring α] (a: α): a * 0 = 0 := by
+  sorry
 
 theorem mul_neg_one [Ring α] (a: α): (-1) * a = -a := by
   apply Eq.symm
