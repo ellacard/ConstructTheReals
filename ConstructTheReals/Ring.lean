@@ -236,6 +236,19 @@ theorem zero_eq_one_trivial [Ring α] (h: (0: α) = 1): ∀ a b: α, a = b := by
     _ = 1 * b := by rw [h]
     _ = b     := by rw [mul_one_left]
 
+-- Ideals
+
+class Semiring.ideal (R: Semiring α) (S: Set α): Prop where
+  unit_mem: 0 ∈ S
+  op_closed: ∀ s₁ s₂, s₁ ∈ S → s₂ ∈ S → s₁ + s₂ ∈ S
+  absorb_prod_left: ∀ s r, s ∈ S → s * r ∈ S
+  absorb_prod_right: ∀ s r, s ∈ S → r * s ∈ S
+
+theorem Semiring.ideal.toSubmonoid {R: Semiring α} {S: Set α} (h: R.ideal S): R.toAddMonoid.sub S := {
+  unit_mem := h.unit_mem
+  op_closed := h.op_closed
+}
+
 -- Integral domain
 
 def Semiring.NoZeroDivisors {α: Type u} [Semiring α]: Prop :=

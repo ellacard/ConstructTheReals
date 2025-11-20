@@ -245,12 +245,18 @@ variable {α: Type u} [R: Semiring α] {β: Set α}
 
 -- Lift the upper operation "multiplication" to the quotient.
 -- First define the operation on α × β.
-
--- TODO: This seems to require β to be an ideal... worst case we can take β = full?
+-- Note that this requires β to be an ideal
 
 def quotient.upper.op_pre (h: R.toAddMonoid.sub β): Op (α × β) :=
   λ (a₁, ⟨b₁, h₁⟩) (a₂, ⟨b₂, h₂⟩) ↦ (a₁ * a₂ + b₁ * b₂, ⟨a₁ * b₂ + a₂ * b₁, by {
     sorry
+  }⟩)
+
+def quotient.upper.op_pre' (h: R.ideal β): Op (α × β) :=
+  λ (a₁, ⟨b₁, h₁⟩) (a₂, ⟨b₂, h₂⟩) ↦ (a₁ * a₂ + b₁ * b₂, ⟨a₁ * b₂ + a₂ * b₁, by {
+    apply h.op_closed
+    · exact h.absorb_prod_right b₂ a₁ h₂
+    · exact h.absorb_prod_right b₁ a₂ h₁
   }⟩)
 
 -- Then prove it is well defined on the quotient,
@@ -259,12 +265,20 @@ def quotient.upper.op_pre (h: R.toAddMonoid.sub β): Op (α × β) :=
 theorem quotient.upper.op_lifts (h: R.toAddMonoid.sub β): ∀ a b c d: (α × β), a ≈ c → b ≈ d → Quotient.mk (setoid h) (quotient.upper.op_pre h a b) = Quotient.mk (setoid h) (quotient.upper.op_pre h c d) := by
   intro ⟨a₁, a₂⟩ ⟨b₁, b₂⟩ ⟨c₁, c₂⟩ ⟨d₁, d₂⟩ ⟨t₁, ht₁₁, ht₁₂⟩ ⟨t₂, ht₂₁, ht₂₂⟩
   apply Quotient.sound
-  sorry
+  let t: α := sorry
+  let stuff: α := sorry
+  let other_stuff: α := sorry
+  exists t
+  constructor
+  · sorry
+  · calc
+      a₁ * b₁ + a₂ * b₂ + (c₁ * d₂ + d₁ * c₂) + t
+      _ = c₁ * d₁ + c₂ * d₂ + (a₁ * b₂ + b₁ * a₂) + t := by sorry
 
 def quotient.upper.op (h: R.toAddMonoid.sub β): Op (quotient h) :=
   λ x y ↦ Quotient.liftOn₂ x y _ (quotient.upper.op_lifts h)
 
--- Prove that the localization of a semiring w.r.t. addition is a semiring.
+-- Prove that the localization of a semiring wrt. addition is a semiring.
 
 instance Localization.additive [R: Semiring α] (h: R.toAddMonoid.sub β): Semiring (quotient h) := {
   add       := (Localization h).op
@@ -284,8 +298,8 @@ instance Localization.additive [R: Semiring α] (h: R.toAddMonoid.sub β): Semir
     · exact h.unit_mem
     · repeat rw [add_zero_right]
       calc
-      (a₁ * b₁ + a₂ * b₂) * c₁ + (a₁ * b₂ + b₁ * a₂) * c₂ + (a₁ * (b₁ * c₂ + c₁ * b₂) + (b₁ * c₁ + b₂ * c₂) * a₂)
-      _ = a₁ * (b₁ * c₁ + b₂ * c₂) + a₂ * (b₁ * c₂ + c₁ * b₂) + ((a₁ * b₁ + a₂ * b₂) * c₂ + c₁ * (a₁ * b₂ + b₁ * a₂)) := by sorry
+        (a₁ * b₁ + a₂ * b₂) * c₁ + (a₁ * b₂ + b₁ * a₂) * c₂ + (a₁ * (b₁ * c₂ + c₁ * b₂) + (b₁ * c₁ + b₂ * c₂) * a₂)
+        _ = a₁ * (b₁ * c₁ + b₂ * c₂) + a₂ * (b₁ * c₂ + c₁ * b₂) + ((a₁ * b₁ + a₂ * b₂) * c₂ + c₁ * (a₁ * b₂ + b₁ * a₂)) := by sorry
   mul_one := by
     constructor <;> (
       intro x
@@ -321,12 +335,44 @@ instance Localization.additive [R: Semiring α] (h: R.toAddMonoid.sub β): Semir
         _ = a₁ * c₁ + a₂ * c₂ + (b₁ * c₁ + b₂ * c₂) + ((a₁ + b₁) * c₂ + c₁ * (a₂ + b₂)) := by sorry
 }
 
--- Prove that the localization of a semiring w.r.t. addition, at the full set,
+
+
+-- Prove that the localization of a semiring wrt. addition at the full set,
 -- i.e. group of differences, is a ring.
 
+-- Define the negative operation and prove it is well defined.
+
+def quotient.lower.neg_pre: α × (@Set.full α) → α × (@Set.full α) :=
+  λ (a₁, a₂) ↦ (a₂, ⟨a₁, trivial⟩)
+
+theorem quotient.lower.neg_lifts : ∀ a b: (α × (@Set.full α)), a ≈ b → Quotient.mk (setoid R.toAddMonoid.full_sub) (quotient.lower.neg_pre a) = Quotient.mk (setoid R.toAddMonoid.full_sub) (quotient.lower.neg_pre b) := by
+  intro ⟨a₁, a₂⟩ ⟨b₁, b₂⟩ ⟨t, ht₁, ht₂⟩
+  apply Quotient.sound
+  exists t
+  constructor
+  · exact ht₁
+  · calc
+      a₂ + b₁ + t
+      _ = b₁ + a₂ + t := by simp [add_comm]
+      _ = a₁ + b₂ + t := by rw [ht₂]
+      _ = b₂ + a₁ + t := by simp [add_comm]
+
+def quotient.lower.neg: quotient R.toAddMonoid.full_sub → quotient R.toAddMonoid.full_sub :=
+  λ x ↦ Quotient.liftOn x _ (quotient.lower.neg_lifts)
+
 instance Localization.additive_group_of_differences [R: Semiring α]: Ring (quotient R.toAddMonoid.full_sub) := {
-  neg := sorry
-  add_neg := sorry
+  neg := quotient.lower.neg
+  add_neg := by
+    constructor <;> (
+      intro x
+      refine Quotient.inductionOn x ?_
+      intro ⟨a₁, a₂⟩
+      apply Quotient.sound
+      exists 0
+      constructor
+      · trivial
+      · simp [add_zero_right, op_comm]
+    )
 }
 
 -- TODO: the additive localization of a commutative semiring should give a commutative ring.
@@ -358,7 +404,9 @@ theorem quotient.lower.op_lifts (h: R.toMulMonoid.sub β): ∀ a b c d: (α × �
   · apply h.op_closed
     · exact ht₁₁
     · exact ht₂₁
-  · sorry
+  · -- TODO notation issue..
+    sorry
+
 
 def quotient.lower.op (h: R.toMulMonoid.sub β): Op (quotient h) :=
   λ x y ↦ Quotient.liftOn₂ x y _ (quotient.lower.op_lifts h)
@@ -378,13 +426,14 @@ theorem quotient.lower.inv_lifts (h: R.toMulMonoid.sub β): ∀ a b: (α × β),
   exists t
   constructor
   · exact ht₁
-  · sorry
+  · -- TODO notation issue..
+    sorry
 
 def quotient.lower.inv (h: R.toMulMonoid.sub β): quotient h → quotient h :=
   λ x ↦ Quotient.liftOn x _ (quotient.lower.inv_lifts h)
 
 -- Prove that he multiplicative localization of a commutative ring
--- w.r.t. multiplication is a commutative ring.
+-- wrt. multiplication is a commutative ring.
 
 instance Localization.multiplicative [R: CommRing α] (h: R.toMulMonoid.sub β): CommRing (quotient h) := {
   mul       := (Localization h).op
@@ -433,30 +482,42 @@ instance Localization.multiplicative [R: CommRing α] (h: R.toMulMonoid.sub β):
       refine Quotient.inductionOn x ?_
       intro ⟨a₁, a₂⟩
       apply Quotient.sound
-      exists sorry
+      exists 1
       constructor
-      sorry
+      · exact h.unit_mem
     )
-    · sorry
-    · sorry
+    · calc
+        (((-a₁ * a₂) + (a₁ * a₂)) * 1) * 1
+        _ = (-a₁ * a₂) + (a₁ * a₂) := by simp [mul_one_right]
+        _ = -(a₁ * a₂) + (a₁ * a₂) := by rw [mul_neg_left]
+        _ = 0                      := by apply op_inv_left
+        _ = (0 * (a₂ * a₂)) * 1    := by simp [mul_zero_left]
+    · calc
+        (((a₁ * a₂) + (-a₁ * a₂)) * 1) * 1
+        _ = (a₁ * a₂) + (-a₁ * a₂) := by simp [mul_one_right]
+        _ = (a₁ * a₂) + -(a₁ * a₂) := by rw [mul_neg_left]
+        _ = 0                      := by apply op_inv_right
+        _ = (0 * (a₂ * a₂)) * 1    := by simp [mul_zero_left]
   add_comm := by
     intro x y
     refine Quotient.inductionOn₂ x y ?_
     intro ⟨a₁, a₂⟩ ⟨b₁, b₂⟩
     apply Quotient.sound
-    exists sorry
+    exists 1
     constructor
-    · sorry
-    · sorry
+    · exact h.unit_mem
+    · calc
+        ((a₁ * b₂ + b₁ * a₂) * (b₂ * a₂)) * 1
+        _ = ((b₁ * a₂ + a₁ * b₂) * (a₂ * b₂)) * 1 := by simp [mul_comm, add_comm]
   distrib := by
     constructor <;> (
       intro x y z
       refine Quotient.inductionOn₃ x y z ?_
       intro ⟨a₁, a₂⟩ ⟨b₁, b₂⟩ ⟨c₁, c₂⟩
       apply Quotient.sound
-      exists sorry
+      exists 1
       constructor
-      · sorry
+      · exact h.unit_mem
     )
     · sorry
     · sorry
