@@ -249,6 +249,13 @@ theorem Semiring.ideal.toSubmonoid {R: Semiring α} {S: Set α} (h: R.ideal S): 
   op_closed := h.op_closed
 }
 
+theorem Semiring.full_ideal {R: Semiring α}: R.ideal Set.full := {
+  unit_mem := trivial
+  op_closed := by intros; trivial
+  absorb_prod_left := by intros; trivial
+  absorb_prod_right := by intros; trivial
+}
+
 -- Integral domain
 
 def Semiring.NoZeroDivisors {α: Type u} [Semiring α]: Prop :=

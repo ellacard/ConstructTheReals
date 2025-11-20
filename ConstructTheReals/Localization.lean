@@ -245,14 +245,9 @@ variable {α: Type u} [R: Semiring α] {β: Set α}
 
 -- Lift the upper operation "multiplication" to the quotient.
 -- First define the operation on α × β.
--- Note that this requires β to be an ideal
+-- Note that this requires β to be an ideal.
 
-def quotient.upper.op_pre (h: R.toAddMonoid.sub β): Op (α × β) :=
-  λ (a₁, ⟨b₁, h₁⟩) (a₂, ⟨b₂, h₂⟩) ↦ (a₁ * a₂ + b₁ * b₂, ⟨a₁ * b₂ + a₂ * b₁, by {
-    sorry
-  }⟩)
-
-def quotient.upper.op_pre' (h: R.ideal β): Op (α × β) :=
+def quotient.upper.op_pre (h: R.ideal β): Op (α × β) :=
   λ (a₁, ⟨b₁, h₁⟩) (a₂, ⟨b₂, h₂⟩) ↦ (a₁ * a₂ + b₁ * b₂, ⟨a₁ * b₂ + a₂ * b₁, by {
     apply h.op_closed
     · exact h.absorb_prod_right b₂ a₁ h₂
@@ -262,7 +257,7 @@ def quotient.upper.op_pre' (h: R.ideal β): Op (α × β) :=
 -- Then prove it is well defined on the quotient,
 -- i.e. if a ≈ c and b ≈ d, then a * b ≈ c * d.
 
-theorem quotient.upper.op_lifts (h: R.toAddMonoid.sub β): ∀ a b c d: (α × β), a ≈ c → b ≈ d → Quotient.mk (setoid h) (quotient.upper.op_pre h a b) = Quotient.mk (setoid h) (quotient.upper.op_pre h c d) := by
+theorem quotient.upper.op_lifts (h: R.ideal β): ∀ a b c d: (α × β), a ≈ c → b ≈ d → Quotient.mk (setoid h.toSubmonoid) (quotient.upper.op_pre h a b) = Quotient.mk (setoid h.toSubmonoid) (quotient.upper.op_pre h c d) := by
   intro ⟨a₁, a₂⟩ ⟨b₁, b₂⟩ ⟨c₁, c₂⟩ ⟨d₁, d₂⟩ ⟨t₁, ht₁₁, ht₁₂⟩ ⟨t₂, ht₂₁, ht₂₂⟩
   apply Quotient.sound
   let t: α := sorry
@@ -275,19 +270,19 @@ theorem quotient.upper.op_lifts (h: R.toAddMonoid.sub β): ∀ a b c d: (α × �
       a₁ * b₁ + a₂ * b₂ + (c₁ * d₂ + d₁ * c₂) + t
       _ = c₁ * d₁ + c₂ * d₂ + (a₁ * b₂ + b₁ * a₂) + t := by sorry
 
-def quotient.upper.op (h: R.toAddMonoid.sub β): Op (quotient h) :=
+def quotient.upper.op (h: R.ideal β): Op (quotient h.toSubmonoid) :=
   λ x y ↦ Quotient.liftOn₂ x y _ (quotient.upper.op_lifts h)
 
--- Prove that the localization of a semiring wrt. addition is a semiring.
+-- Prove that the localization of a commutative semiring wrt. addition is a semiring.
 
-instance Localization.additive [R: Semiring α] (h: R.toAddMonoid.sub β): Semiring (quotient h) := {
-  add       := (Localization h).op
-  zero      := (Localization h).unit
-  add_assoc := (Localization h).assoc
-  add_zero  := (Localization h).identity
-  add_comm  := (Localization h).comm
-  mul := quotient.upper.op h
-  one := Quotient.mk _ (1, ⟨0, h.unit_mem⟩)
+instance Localization.additive [R: Semiring α] (h: R.ideal β): Semiring (quotient h.toSubmonoid) := {
+  add       := (Localization h.toSubmonoid).op
+  zero      := (Localization h.toSubmonoid).unit
+  add_assoc := (Localization h.toSubmonoid).assoc
+  add_zero  := (Localization h.toSubmonoid).identity
+  add_comm  := (Localization h.toSubmonoid).comm
+  mul       := quotient.upper.op h
+  one       := Quotient.mk _ (1, ⟨0, h.unit_mem⟩)
   mul_assoc := by
     intro x y z
     refine Quotient.inductionOn₃ x y z ?_
@@ -299,7 +294,8 @@ instance Localization.additive [R: Semiring α] (h: R.toAddMonoid.sub β): Semir
     · repeat rw [add_zero_right]
       calc
         (a₁ * b₁ + a₂ * b₂) * c₁ + (a₁ * b₂ + b₁ * a₂) * c₂ + (a₁ * (b₁ * c₂ + c₁ * b₂) + (b₁ * c₁ + b₂ * c₂) * a₂)
-        _ = a₁ * (b₁ * c₁ + b₂ * c₂) + a₂ * (b₁ * c₂ + c₁ * b₂) + ((a₁ * b₁ + a₂ * b₂) * c₂ + c₁ * (a₁ * b₂ + b₁ * a₂)) := by sorry
+        _ = (a₁ * b₁ * c₁) + ((a₂ * b₂ * c₁) + (a₁ * b₂ * c₂)) + ((b₁ * a₂) * c₂) + ((a₁ * b₁ * c₂) + ((((a₁ * c₁) * b₂) + ((b₁ * c₁) * a₂)) + ((b₂ * c₂) * a₂))) := by simp [distrib_left, distrib_right, add_assoc, mul_assoc]
+        _ = a₁ * (b₁ * c₁ + b₂ * c₂) + a₂ * (b₁ * c₂ + c₁ * b₂) + ((a₁ * b₁ + a₂ * b₂) * c₂ + c₁ * (a₁ * b₂ + b₁ * a₂)) := sorry
   mul_one := by
     constructor <;> (
       intro x
@@ -329,10 +325,16 @@ instance Localization.additive [R: Semiring α] (h: R.toAddMonoid.sub β): Semir
     )
     · calc
         a₁ * (b₁ + c₁) + a₂ * (b₂ + c₂) + (a₁ * b₂ + b₁ * a₂ + (a₁ * c₂ + c₁ * a₂))
-        _ = a₁ * b₁ + a₂ * b₂ + (a₁ * c₁ + a₂ * c₂) + (a₁ * (b₂ + c₂) + (b₁ + c₁) * a₂) := by sorry
+        _ = a₁ * b₁ + ((a₁ * c₁) + (a₂ * b₂)) + a₂ * c₂ + (a₁ * b₂ + ((b₁ * a₂) + (a₁ * c₂)) + c₁ * a₂) := by simp [distrib_left, add_assoc]
+        _ = a₁ * b₁ + ((a₂ * b₂) + (a₁ * c₁)) + a₂ * c₂ + (a₁ * b₂ + ((a₁ * c₂) + (b₁ * a₂)) + c₁ * a₂) := by simp [add_comm]
+        _ = a₁ * b₁ + a₂ * b₂ + (a₁ * c₁ + a₂ * c₂) + ((a₁ * b₂ + a₁ * c₂) + (b₁ * a₂ + c₁ * a₂))       := by simp [add_assoc]
+        _ = a₁ * b₁ + a₂ * b₂ + (a₁ * c₁ + a₂ * c₂) + (a₁ * (b₂ + c₂) + (b₁ + c₁) * a₂)                 := by simp [distrib_left, distrib_right]
     · calc
         (a₁ + b₁) * c₁ + (a₂ + b₂) * c₂ + (a₁ * c₂ + c₁ * a₂ + (b₁ * c₂ + c₁ * b₂))
-        _ = a₁ * c₁ + a₂ * c₂ + (b₁ * c₁ + b₂ * c₂) + ((a₁ + b₁) * c₂ + c₁ * (a₂ + b₂)) := by sorry
+        _ = a₁ * c₁ + (b₁ * c₁ + (a₂ * c₂)) + b₂ * c₂ + (a₁ * c₂ + (c₁ * a₂ + (b₁ * c₂)) + c₁ * b₂) := by simp [distrib_right, add_assoc]
+        _ = a₁ * c₁ + ((a₂ * c₂) + b₁ * c₁) + b₂ * c₂ + (a₁ * c₂ + ((b₁ * c₂) + c₁ * a₂) + c₁ * b₂) := by simp [add_comm]
+        _ = a₁ * c₁ + a₂ * c₂ + (b₁ * c₁ + b₂ * c₂) + ((a₁ * c₂ + b₁ * c₂) + (c₁ * a₂ + c₁ * b₂))   := by simp [add_assoc]
+        _ = a₁ * c₁ + a₂ * c₂ + (b₁ * c₁ + b₂ * c₂) + ((a₁ + b₁) * c₂ + c₁ * (a₂ + b₂))             := by simp [distrib_left, distrib_right]
 }
 
 
@@ -360,9 +362,19 @@ theorem quotient.lower.neg_lifts : ∀ a b: (α × (@Set.full α)), a ≈ b → 
 def quotient.lower.neg: quotient R.toAddMonoid.full_sub → quotient R.toAddMonoid.full_sub :=
   λ x ↦ Quotient.liftOn x _ (quotient.lower.neg_lifts)
 
-instance Localization.additive_group_of_differences [R: Semiring α]: Ring (quotient R.toAddMonoid.full_sub) := {
-  neg := quotient.lower.neg
-  add_neg := by
+instance Localization.additive_group_of_differences [R: Semiring α]: Ring (quotient R.full_ideal.toSubmonoid) := {
+  add       := (Localization.additive R.full_ideal).add
+  zero      := (Localization.additive R.full_ideal).zero
+  add_assoc := (Localization.additive R.full_ideal).add_assoc
+  add_zero  := (Localization.additive R.full_ideal).add_zero
+  add_comm  := (Localization.additive R.full_ideal).add_comm
+  mul       := (Localization.additive R.full_ideal).mul
+  one       := (Localization.additive R.full_ideal).one
+  mul_assoc := (Localization.additive R.full_ideal).mul_assoc
+  mul_one   := (Localization.additive R.full_ideal).mul_one
+  distrib   := (Localization.additive R.full_ideal).distrib
+  neg       := quotient.lower.neg
+  add_neg   := by
     constructor <;> (
       intro x
       refine Quotient.inductionOn x ?_
@@ -519,7 +531,8 @@ instance Localization.multiplicative [R: CommRing α] (h: R.toMulMonoid.sub β):
       constructor
       · exact h.unit_mem
     )
-    · sorry
+    · -- TODO notation issue..
+      sorry
     · sorry
 }
 
