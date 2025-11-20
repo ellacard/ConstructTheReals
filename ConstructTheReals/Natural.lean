@@ -171,7 +171,7 @@ theorem mul_cancel_left {a b c: ℕ} (h: a * b = a * c) (ha: a ≠ 0): b = c := 
   | next p hp =>
     sorry
 
-theorem mul_cancel_right {a b c: ℕ} (h: a + c = b + c) (hc: c ≠ 0): a = b := by
+theorem mul_cancel_right {a b c: ℕ} (h: a * c = b * c) (hc: c ≠ 0): a = b := by
   induction c with
   | zero => contradiction
   | next p hp =>

@@ -51,7 +51,7 @@ open Monoid
 -- Define the localization relation on α × β.
 
 def relation (β: Set α): α × β → α × β → Prop :=
-  λ (a₁, ⟨b₁, _⟩) (a₂, ⟨b₂, _⟩) ↦ ∃ t ∈ β, a₁ + b₂ + t = a₂ + b₁ + t
+  λ (a₁, ⟨a₂, _⟩) (b₁, ⟨b₂, _⟩) ↦ ∃ t ∈ β, a₁ + b₂ + t = b₁ + a₂ + t
 
 instance: HasEquiv (α × β) := {
   Equiv := relation β
@@ -61,19 +61,19 @@ instance: HasEquiv (α × β) := {
 
 theorem equivalence (h: M.sub β): Equivalence (relation β) := {
   refl := by
-    intro (a, b)
+    intro
     exists 0
     constructor
     · exact h.unit_mem
     ·  rw [op_unit_right]
   symm := by
-    intro (a₁, b₁) (a₂, b₂) ⟨t, ht₁, ht₂⟩
+    intro _ _ ⟨t, ht₁, ht₂⟩
     exists t
     constructor
     · exact ht₁
     · exact Eq.symm ht₂
   trans := by
-    intro (a₁, b₁) (a₂, b₂) (a₃, b₃) ⟨t₁, ht₁₁, ht₁₂⟩ ⟨t₂, ht₂₁, ht₂₂⟩
+    intro (a₁, a₂) (b₁, b₂) (c₁, c₂) ⟨t₁, ht₁₁, ht₁₂⟩ ⟨t₂, ht₂₁, ht₂₂⟩
     exists t₁ + t₂ + b₂
     constructor
     · repeat apply h.op_closed
@@ -81,20 +81,20 @@ theorem equivalence (h: M.sub β): Equivalence (relation β) := {
       · exact ht₂₁
       · exact b₂.property
     · calc
-        a₁ + b₃ + (t₁ + t₂ + b₂)
-        _ = a₁ + (((b₃ + t₁) + t₂) + b₂) := by simp [op_assoc]
-        _ = a₁ + (b₂ + ((t₁ + b₃) + t₂)) := by simp [op_comm]
-        _ = (a₁ + b₂ + t₁) + b₃ + t₂     := by simp [op_assoc]
-        _ = (a₂ + b₁ + t₁) + b₃ + t₂     := by rw [ht₁₂]
-        _ = (a₂ + (b₁ + t₁)) + b₃ + t₂   := by simp [op_assoc]
-        _ = ((b₁ + t₁) + a₂) + b₃ + t₂   := by simp [op_comm]
-        _ = b₁ + t₁ + (a₂ + b₃ + t₂)     := by simp [op_assoc]
-        _ = b₁ + t₁ + (a₃ + b₂ + t₂)     := by rw [ht₂₂]
-        _ = ((b₁ + t₁) + a₃) + b₂ + t₂   := by simp [op_assoc]
-        _ = (a₃ + (b₁ + t₁)) + b₂ + t₂   := by simp [op_comm]
-        _ = a₃ + b₁ + (t₁ + (b₂ + t₂))   := by simp [op_assoc]
-        _ = a₃ + b₁ + (t₁ + (t₂ + b₂))   := by simp [op_comm]
-        _ = a₃ + b₁ + (t₁ + t₂ + b₂)     := by simp [op_assoc]
+        a₁ + c₂ + (t₁ + t₂ + b₂)
+        _ = a₁ + (((c₂ + t₁) + t₂) + b₂) := by simp [op_assoc]
+        _ = a₁ + (b₂ + ((t₁ + c₂) + t₂)) := by simp [op_comm]
+        _ = (a₁ + b₂ + t₁) + c₂ + t₂     := by simp [op_assoc]
+        _ = (b₁ + a₂ + t₁) + c₂ + t₂     := by rw [ht₁₂]
+        _ = (b₁ + (a₂ + t₁)) + c₂ + t₂   := by simp [op_assoc]
+        _ = ((a₂ + t₁) + b₁) + c₂ + t₂   := by simp [op_comm]
+        _ = a₂ + t₁ + (b₁ + c₂ + t₂)     := by simp [op_assoc]
+        _ = a₂ + t₁ + (c₁ + b₂ + t₂)     := by rw [ht₂₂]
+        _ = ((a₂ + t₁) + c₁) + b₂ + t₂   := by simp [op_assoc]
+        _ = (c₁ + (a₂ + t₁)) + b₂ + t₂   := by simp [op_comm]
+        _ = c₁ + a₂ + (t₁ + (b₂ + t₂))   := by simp [op_assoc]
+        _ = c₁ + a₂ + (t₁ + (t₂ + b₂))   := by simp [op_comm]
+        _ = c₁ + a₂ + (t₁ + t₂ + b₂)     := by simp [op_assoc]
 }
 
 -- Define the quotient.
@@ -114,7 +114,7 @@ def quotient.unit (h: M.sub β): quotient h :=
 -- First define the operation on α × β.
 
 def quotient.op_pre (h: M.sub β): Op (α × β) :=
-  λ (a₁, ⟨b₁, h₁⟩) (a₂, ⟨b₂, h₂⟩) ↦ (a₁ + a₂, ⟨b₁ + b₂, h.op_closed b₁ b₂ h₁ h₂⟩)
+  λ (a₁, ⟨a₂, h₁⟩) (b₁, ⟨b₂, h₂⟩) ↦ (a₁ + b₁, ⟨a₂ + b₂, h.op_closed a₂ b₂ h₁ h₂⟩)
 
 -- Then prove it is well defined on the quotient,
 -- i.e. if a ≈ c and b ≈ d, then a + b ≈ c + d.
@@ -153,7 +153,7 @@ instance Localization (h: M.sub β): CommMonoid (quotient h) := {
     constructor <;> (
       intro x
       refine Quotient.inductionOn x ?_
-      intro (a, ⟨b, hb⟩)
+      intro
       apply Quotient.sound
       exists 0
       constructor
@@ -196,20 +196,20 @@ abbrev quotient.full (α: Type u) [M: CommMonoid α]: Type u :=
 -- First define the operation on α × β.
 
 def quotient.inv_pre: α × @Set.full α → α × @Set.full α :=
-  λ (a, b) =>(b, ⟨a, by trivial⟩)
+  λ (a₁, a₂) ↦ (a₂, ⟨a₁, by trivial⟩)
 
 -- Then prove it is well defined on the quotient,
 -- i.e. if a ≈ b, then a⁻¹ ≈ b⁻¹
 
 theorem quotient.inv.lifts: ∀ a b: α × @Set.full α, a ≈ b → Quotient.mk setoid.full (quotient.inv_pre a) = Quotient.mk setoid.full (quotient.inv_pre b) := by
-  intro (a₁, ⟨b₁, h₁⟩) (a₂, ⟨b₂, h₂⟩) ⟨t, ht₁, ht₂⟩
+  intro (a₁, ⟨a₂, h₁⟩) (b₁, ⟨b₂, h₂⟩) ⟨t, ht₁, ht₂⟩
   apply Quotient.sound
   exists t
   constructor
   · trivial
   · calc
-      b₁ + a₂ + t
-      _ = a₂ + b₁ + t := by simp [op_comm]
+      a₂ + b₁ + t
+      _ = b₁ + a₂ + t := by simp [op_comm]
       _ = a₁ + b₂ + t := by rw [ht₂]
       _ = b₂ + a₁ + t := by simp [op_comm]
 
@@ -248,10 +248,10 @@ variable {α: Type u} [R: Semiring α] {β: Set α}
 -- Note that this requires β to be an ideal.
 
 def quotient.upper.op_pre (h: R.ideal β): Op (α × β) :=
-  λ (a₁, ⟨b₁, h₁⟩) (a₂, ⟨b₂, h₂⟩) ↦ (a₁ * a₂ + b₁ * b₂, ⟨a₁ * b₂ + a₂ * b₁, by {
+  λ (a₁, ⟨a₂, h₁⟩) (b₁, ⟨b₂, h₂⟩) ↦ (a₁ * b₁ + a₂ * b₂, ⟨a₁ * b₂ + b₁ * a₂, by {
     apply h.op_closed
     · exact h.absorb_prod_right b₂ a₁ h₂
-    · exact h.absorb_prod_right b₁ a₂ h₁
+    · exact h.absorb_prod_right a₂ b₁ h₁
   }⟩)
 
 -- Then prove it is well defined on the quotient,
@@ -300,7 +300,7 @@ instance Localization.additive [R: Semiring α] (h: R.ideal β): Semiring (quoti
     constructor <;> (
       intro x
       refine Quotient.inductionOn x ?_
-      intro ⟨a₁, a₂⟩
+      intro
       apply Quotient.sound
       exists 0
       constructor
@@ -378,7 +378,7 @@ instance Localization.additive_group_of_differences [R: Semiring α]: Ring (quot
     constructor <;> (
       intro x
       refine Quotient.inductionOn x ?_
-      intro ⟨a₁, a₂⟩
+      intro
       apply Quotient.sound
       exists 0
       constructor
@@ -403,7 +403,7 @@ variable {α: Type u} [R: CommRing α] {β: Set α}
 -- First define the operation on α × β.
 
 def quotient.lower.op_pre (h: R.toMulMonoid.sub β): Op (α × β) :=
-  λ (a₁, ⟨b₁, h₁⟩) (a₂, ⟨b₂, h₂⟩) ↦ (a₁ * b₂ + a₂ * b₁, ⟨b₁ * b₂, h.op_closed b₁ b₂ h₁ h₂⟩)
+  λ (a₁, ⟨a₂, h₁⟩) (b₁, ⟨b₂, h₂⟩) ↦ (a₁ * b₂ + b₁ * a₂, ⟨a₂ * b₂, h.op_closed a₂ b₂ h₁ h₂⟩)
 
 -- Then prove it is well defined on the quotient,
 -- i.e. if a ≈ c and b ≈ d, then a + b ≈ c + d.
@@ -427,13 +427,13 @@ def quotient.lower.op (h: R.toMulMonoid.sub β): Op (quotient h) :=
 -- First define the operation on α × β.
 
 def quotient.lower.inv_pre: α × β → α × β :=
-  λ (r, s) ↦ (-r, s)
+  λ (a₁, a₂) ↦ (-a₁, a₂)
 
 -- Then prove it is well defined on the quotient,
 -- i.e. if a ≈ b, then a⁻¹ ≈ b⁻¹
 
 theorem quotient.lower.inv_lifts (h: R.toMulMonoid.sub β): ∀ a b: (α × β), a ≈ b → Quotient.mk (setoid h) (quotient.lower.inv_pre a) = Quotient.mk (setoid h) (quotient.lower.inv_pre b) := by
-  intro _ _ ⟨t, ht₁, ht₂⟩
+  intro ⟨a₁, a₂⟩ ⟨b₁, b₂⟩ ⟨t, ht₁, ht₂⟩
   apply Quotient.sound
   exists t
   constructor
@@ -654,8 +654,8 @@ theorem quotient.mul_le_lifts (h: order_compatible M P) (hB: M.sub β): ∀ a b 
   intro a b c d h₁ h₂
   simp
   constructor
-  exact mul_le_lifts_imp h a b c d h₁ h₂
-  exact mul_le_lifts_imp h c d a b ((equivalence hB).symm h₁) ((equivalence hB).symm h₂)
+  · exact mul_le_lifts_imp h a b c d h₁ h₂
+  · exact mul_le_lifts_imp h c d a b ((equivalence hB).symm h₁) ((equivalence hB).symm h₂)
 
 def quotient.mul_le (h₀: order_compatible M P) (h: M.sub β): Endorelation (quotient h) :=
   λ x y ↦ Quotient.liftOn₂ x y _ (quotient.le_lifts h₀ h)

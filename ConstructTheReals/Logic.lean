@@ -12,7 +12,5 @@ theorem contrapose {P Q: Prop}: (¬Q → ¬P) → (P → Q) := by
 theorem contrapose_iff {P Q: Prop}: (¬Q ↔ ¬P) → (P ↔ Q) := by
   intro ⟨h1, h2⟩
   constructor
-  · apply contrapose
-    exact h1
-  · apply contrapose
-    exact h2
+  · exact contrapose h1
+  · exact contrapose h2
