@@ -86,7 +86,7 @@ theorem Set.nonempty_iff {S: Set α}: S.nonempty ↔ S ≠ ∅ := by
     · intro h'
       exact h _ h'
     · intro h'
-      exact False.elim h'
+      contradiction
 
 theorem Set.not_nonempty_iff {S: Set α}: ¬S.nonempty ↔ S = ∅ := by
   apply contrapose_iff

@@ -146,3 +146,16 @@ def Monoid.opposite (M: Monoid α): Monoid α := {
 
 def Monoid.zerosumfree (M: Monoid α): Prop :=
   ∀ a b: α, a + b = 0 → a = 0 ∧ b = 0
+
+-- Monoid simplifier. Useful for `calc` steps in localization.
+
+theorem op_swap [CommMonoid α] {a b c: α}: (a + b) + c = (a + c) + b := by
+  rw [op_assoc]
+  rw [op_comm b c]
+  rw [←op_assoc]
+
+theorem op_swap' [CommMonoid α] {a b c: α}: (a + b) + c = (b + a) + c := by
+  rw [op_comm a b]
+
+macro "simp_monoid": tactic =>
+  `(tactic| try simp [←op_assoc, op_swap, op_swap'])

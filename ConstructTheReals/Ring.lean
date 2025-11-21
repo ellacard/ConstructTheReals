@@ -136,8 +136,8 @@ theorem neg_sub' [Ring α] (a b: α): -(a - b) = -a + b := by
 theorem neg_zero [Ring α]: -(0: α) = 0 := by
   apply inv_unit
 
-theorem mul_comm [CommRing α] (a b: α): a * b = b * a := by
-  apply CommRing.mul_comm
+theorem mul_comm [CommSemiring α] (a b: α): a * b = b * a := by
+  apply CommSemiring.mul_comm
 
 -- nmul and npow
 
@@ -272,3 +272,32 @@ theorem IntegralDomain.nonzero_submonoid {α: Type u} [R: IntegralDomain α]: R.
   unit_mem := Ne.symm nontrivial
   op_closed := no_zero_divisors
 }
+
+-- Semiring simplifier. Useful for `calc` steps in localization.
+-- TODO simp for regular rings too? or is this too inefficient? maybe remove?
+
+theorem add_swap [Semiring α] {a b c: α}: (a + b) + c = (a + c) + b := by
+  rw [add_assoc]
+  rw [add_comm b c]
+  rw [add_assoc]
+
+theorem add_swap' [Semiring α] {a b c: α}: (a + b) + c = (b + a) + c := by
+  rw [add_comm a b]
+
+theorem mul_swap [CommSemiring α] {a b c: α}: (a * b) * c = (a * c) * b := by
+  rw [mul_assoc]
+  rw [mul_comm b c]
+  rw [mul_assoc]
+
+theorem mul_swap' [CommSemiring α] {a b c: α}: (a * b) * c = (b * a) * c := by
+  rw [mul_comm a b]
+
+macro "simp_semiring": tactic =>
+  `(tactic| try simp [
+    mul_zero_left, mul_zero_right,
+    mul_one_left, mul_one_right,
+    add_zero_left, add_zero_right,
+    ←add_assoc, ←mul_assoc,
+    distrib_left, distrib_right,
+    add_swap, add_swap',
+    mul_swap, mul_swap' ]; try rw [add_comm]; try rw [mul_comm])

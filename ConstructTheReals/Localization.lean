@@ -82,19 +82,11 @@ theorem equivalence (h: M.sub β): Equivalence (relation β) := {
       · exact b₂.property
     · calc
         a₁ + c₂ + (t₁ + t₂ + b₂)
-        _ = a₁ + (((c₂ + t₁) + t₂) + b₂) := by simp [op_assoc]
-        _ = a₁ + (b₂ + ((t₁ + c₂) + t₂)) := by simp [op_comm]
-        _ = (a₁ + b₂ + t₁) + c₂ + t₂     := by simp [op_assoc]
-        _ = (b₁ + a₂ + t₁) + c₂ + t₂     := by rw [ht₁₂]
-        _ = (b₁ + (a₂ + t₁)) + c₂ + t₂   := by simp [op_assoc]
-        _ = ((a₂ + t₁) + b₁) + c₂ + t₂   := by simp [op_comm]
-        _ = a₂ + t₁ + (b₁ + c₂ + t₂)     := by simp [op_assoc]
-        _ = a₂ + t₁ + (c₁ + b₂ + t₂)     := by rw [ht₂₂]
-        _ = ((a₂ + t₁) + c₁) + b₂ + t₂   := by simp [op_assoc]
-        _ = (c₁ + (a₂ + t₁)) + b₂ + t₂   := by simp [op_comm]
-        _ = c₁ + a₂ + (t₁ + (b₂ + t₂))   := by simp [op_assoc]
-        _ = c₁ + a₂ + (t₁ + (t₂ + b₂))   := by simp [op_comm]
-        _ = c₁ + a₂ + (t₁ + t₂ + b₂)     := by simp [op_assoc]
+        _ = (a₁ + b₂ + t₁) + c₂ + t₂ := by simp_monoid
+        _ = (b₁ + a₂ + t₁) + c₂ + t₂ := by rw [ht₁₂]
+        _ = a₂ + t₁ + (b₁ + c₂ + t₂) := by simp_monoid
+        _ = a₂ + t₁ + (c₁ + b₂ + t₂) := by rw [ht₂₂]
+        _ = c₁ + a₂ + (t₁ + t₂ + b₂) := by simp_monoid
 }
 
 -- Define the quotient.
@@ -129,17 +121,9 @@ theorem quotient.op_lifts (h: M.sub β): ∀ a b c d: (α × β), a ≈ c → b 
     · exact ht₂₁
   · calc
       a₁ + b₁ + (c₂ + d₂) + (t₁ + t₂)
-      _ = (a₁ + (b₁ + c₂) + d₂ + t₁) + t₂   := by simp [op_assoc]
-      _ = (a₁ + (c₂ + b₁) + d₂ + t₁) + t₂   := by simp [op_comm]
-      _ = a₁ + c₂ + ((b₁ + d₂) + t₁) + t₂   := by simp [op_assoc]
-      _ = a₁ + c₂ + (t₁ + (b₁ + d₂)) + t₂   := by simp [op_comm]
-      _ = (a₁ + c₂ + t₁) + (b₁ + d₂ + t₂)   := by simp [op_assoc]
-      _ = (c₁ + a₂ + t₁) + (d₁ + b₂ + t₂)   := by rw [ht₁₂, ht₂₂]
-      _ = c₁ + ((a₂ + t₁) + d₁) + (b₂ + t₂) := by simp [op_assoc]
-      _ = c₁ + (d₁ + (a₂ + t₁)) + (t₂ + b₂) := by simp [op_comm]
-      _ = c₁ + d₁ + (a₂ + ((t₁ + t₂) + b₂)) := by simp [op_assoc]
-      _ = c₁ + d₁ + (a₂ + (b₂ + (t₁ + t₂))) := by simp [op_comm]
-      _ = c₁ + d₁ + (a₂ + b₂) + (t₁ + t₂)   := by simp [op_assoc]
+      _ = (a₁ + c₂ + t₁) + (b₁ + d₂ + t₂) := by simp_monoid
+      _ = (c₁ + a₂ + t₁) + (d₁ + b₂ + t₂) := by rw [ht₁₂, ht₂₂]
+      _ = c₁ + d₁ + (a₂ + b₂) + (t₁ + t₂) := by simp_monoid
 
 def quotient.op (h: M.sub β): Op (quotient h) :=
   λ x y ↦ Quotient.liftOn₂ x y _ (quotient.op_lifts h)
@@ -192,14 +176,12 @@ def setoid.full: Setoid (α × @Set.full α) :=
 abbrev quotient.full (α: Type u) [M: CommMonoid α]: Type u :=
   quotient M.full_sub
 
--- Lift the operation "inverse" to the quotient.
--- First define the operation on α × β.
+-- Define the inverse the operation on α × β.
 
 def quotient.inv_pre: α × @Set.full α → α × @Set.full α :=
   λ (a₁, a₂) ↦ (a₂, ⟨a₁, by trivial⟩)
 
--- Then prove it is well defined on the quotient,
--- i.e. if a ≈ b, then a⁻¹ ≈ b⁻¹
+-- Prove if a ≈ b, then -a ≈ -b
 
 theorem quotient.inv.lifts: ∀ a b: α × @Set.full α, a ≈ b → Quotient.mk setoid.full (quotient.inv_pre a) = Quotient.mk setoid.full (quotient.inv_pre b) := by
   intro (a₁, ⟨a₂, h₁⟩) (b₁, ⟨b₂, h₂⟩) ⟨t, ht₁, ht₂⟩
@@ -209,9 +191,9 @@ theorem quotient.inv.lifts: ∀ a b: α × @Set.full α, a ≈ b → Quotient.mk
   · trivial
   · calc
       a₂ + b₁ + t
-      _ = b₁ + a₂ + t := by simp [op_comm]
+      _ = b₁ + a₂ + t := by simp_monoid
       _ = a₁ + b₂ + t := by rw [ht₂]
-      _ = b₂ + a₁ + t := by simp [op_comm]
+      _ = b₂ + a₁ + t := by simp_monoid
 
 def quotient.inv: quotient.full (α := α) → quotient.full (α := α) :=
   λ x ↦ Quotient.liftOn x _ quotient.inv.lifts
@@ -243,8 +225,7 @@ variable {α: Type u} [R: Semiring α] {β: Set α}
 
 -- Additive localization of a semiring.
 
--- Lift the upper operation "multiplication" to the quotient.
--- First define the operation on α × β.
+-- Define the upper operation "multiplication" on α × β.
 -- Note that this requires β to be an ideal.
 
 def quotient.upper.op_pre (h: R.ideal β): Op (α × β) :=
@@ -254,8 +235,7 @@ def quotient.upper.op_pre (h: R.ideal β): Op (α × β) :=
     · exact h.absorb_prod_right a₂ b₁ h₁
   }⟩)
 
--- Then prove it is well defined on the quotient,
--- i.e. if a ≈ c and b ≈ d, then a * b ≈ c * d.
+-- Prove if a ≈ c and b ≈ d, then a * b ≈ c * d.
 
 theorem quotient.upper.op_lifts (h: R.ideal β): ∀ a b c d: (α × β), a ≈ c → b ≈ d → Quotient.mk (setoid h.toSubmonoid) (quotient.upper.op_pre h a b) = Quotient.mk (setoid h.toSubmonoid) (quotient.upper.op_pre h c d) := by
   intro ⟨a₁, a₂⟩ ⟨b₁, b₂⟩ ⟨c₁, c₂⟩ ⟨d₁, d₂⟩ ⟨t₁, ht₁₁, ht₁₂⟩ ⟨t₂, ht₂₁, ht₂₂⟩
@@ -274,6 +254,7 @@ def quotient.upper.op (h: R.ideal β): Op (quotient h.toSubmonoid) :=
   λ x y ↦ Quotient.liftOn₂ x y _ (quotient.upper.op_lifts h)
 
 -- Prove that the localization of a commutative semiring wrt. addition is a semiring.
+-- TODO need CommSemiring for mul_assoc?
 
 instance Localization.additive [R: Semiring α] (h: R.ideal β): Semiring (quotient h.toSubmonoid) := {
   add       := (Localization h.toSubmonoid).op
@@ -294,8 +275,7 @@ instance Localization.additive [R: Semiring α] (h: R.ideal β): Semiring (quoti
     · repeat rw [add_zero_right]
       calc
         (a₁ * b₁ + a₂ * b₂) * c₁ + (a₁ * b₂ + b₁ * a₂) * c₂ + (a₁ * (b₁ * c₂ + c₁ * b₂) + (b₁ * c₁ + b₂ * c₂) * a₂)
-        _ = (a₁ * b₁ * c₁) + ((a₂ * b₂ * c₁) + (a₁ * b₂ * c₂)) + ((b₁ * a₂) * c₂) + ((a₁ * b₁ * c₂) + ((((a₁ * c₁) * b₂) + ((b₁ * c₁) * a₂)) + ((b₂ * c₂) * a₂))) := by simp [distrib_left, distrib_right, add_assoc, mul_assoc]
-        _ = a₁ * (b₁ * c₁ + b₂ * c₂) + a₂ * (b₁ * c₂ + c₁ * b₂) + ((a₁ * b₁ + a₂ * b₂) * c₂ + c₁ * (a₁ * b₂ + b₁ * a₂)) := sorry
+        _ = a₁ * (b₁ * c₁ + b₂ * c₂) + a₂ * (b₁ * c₂ + c₁ * b₂) + ((a₁ * b₁ + a₂ * b₂) * c₂ + c₁ * (a₁ * b₂ + b₁ * a₂)) := sorry--by simp_semiring
   mul_one := by
     constructor <;> (
       intro x
@@ -305,12 +285,7 @@ instance Localization.additive [R: Semiring α] (h: R.ideal β): Semiring (quoti
       exists 0
       constructor
       · exact h.unit_mem
-      · repeat rw [mul_one_left]
-        repeat rw [mul_one_right]
-        repeat rw [mul_zero_left]
-        repeat rw [mul_zero_right]
-        repeat rw [add_zero_left]
-        repeat rw [add_zero_right]
+      · simp_semiring
     )
   distrib :=  by
     constructor <;> (
@@ -325,16 +300,10 @@ instance Localization.additive [R: Semiring α] (h: R.ideal β): Semiring (quoti
     )
     · calc
         a₁ * (b₁ + c₁) + a₂ * (b₂ + c₂) + (a₁ * b₂ + b₁ * a₂ + (a₁ * c₂ + c₁ * a₂))
-        _ = a₁ * b₁ + ((a₁ * c₁) + (a₂ * b₂)) + a₂ * c₂ + (a₁ * b₂ + ((b₁ * a₂) + (a₁ * c₂)) + c₁ * a₂) := by simp [distrib_left, add_assoc]
-        _ = a₁ * b₁ + ((a₂ * b₂) + (a₁ * c₁)) + a₂ * c₂ + (a₁ * b₂ + ((a₁ * c₂) + (b₁ * a₂)) + c₁ * a₂) := by simp [add_comm]
-        _ = a₁ * b₁ + a₂ * b₂ + (a₁ * c₁ + a₂ * c₂) + ((a₁ * b₂ + a₁ * c₂) + (b₁ * a₂ + c₁ * a₂))       := by simp [add_assoc]
-        _ = a₁ * b₁ + a₂ * b₂ + (a₁ * c₁ + a₂ * c₂) + (a₁ * (b₂ + c₂) + (b₁ + c₁) * a₂)                 := by simp [distrib_left, distrib_right]
+        _ = a₁ * b₁ + a₂ * b₂ + (a₁ * c₁ + a₂ * c₂) + (a₁ * (b₂ + c₂) + (b₁ + c₁) * a₂) := by simp_semiring
     · calc
         (a₁ + b₁) * c₁ + (a₂ + b₂) * c₂ + (a₁ * c₂ + c₁ * a₂ + (b₁ * c₂ + c₁ * b₂))
-        _ = a₁ * c₁ + (b₁ * c₁ + (a₂ * c₂)) + b₂ * c₂ + (a₁ * c₂ + (c₁ * a₂ + (b₁ * c₂)) + c₁ * b₂) := by simp [distrib_right, add_assoc]
-        _ = a₁ * c₁ + ((a₂ * c₂) + b₁ * c₁) + b₂ * c₂ + (a₁ * c₂ + ((b₁ * c₂) + c₁ * a₂) + c₁ * b₂) := by simp [add_comm]
-        _ = a₁ * c₁ + a₂ * c₂ + (b₁ * c₁ + b₂ * c₂) + ((a₁ * c₂ + b₁ * c₂) + (c₁ * a₂ + c₁ * b₂))   := by simp [add_assoc]
-        _ = a₁ * c₁ + a₂ * c₂ + (b₁ * c₁ + b₂ * c₂) + ((a₁ + b₁) * c₂ + c₁ * (a₂ + b₂))             := by simp [distrib_left, distrib_right]
+        _ = a₁ * c₁ + a₂ * c₂ + (b₁ * c₁ + b₂ * c₂) + ((a₁ + b₁) * c₂ + c₁ * (a₂ + b₂)) := by simp_semiring
 }
 
 
@@ -342,10 +311,12 @@ instance Localization.additive [R: Semiring α] (h: R.ideal β): Semiring (quoti
 -- Prove that the localization of a semiring wrt. addition at the full set,
 -- i.e. group of differences, is a ring.
 
--- Define the negative operation and prove it is well defined.
+-- Define the "negative" operation on α × β.
 
 def quotient.lower.neg_pre: α × (@Set.full α) → α × (@Set.full α) :=
   λ (a₁, a₂) ↦ (a₂, ⟨a₁, trivial⟩)
+
+-- Prove if a ≈ b, then -a ≈ -b.
 
 theorem quotient.lower.neg_lifts : ∀ a b: (α × (@Set.full α)), a ≈ b → Quotient.mk (setoid R.toAddMonoid.full_sub) (quotient.lower.neg_pre a) = Quotient.mk (setoid R.toAddMonoid.full_sub) (quotient.lower.neg_pre b) := by
   intro ⟨a₁, a₂⟩ ⟨b₁, b₂⟩ ⟨t, ht₁, ht₂⟩
@@ -399,14 +370,12 @@ variable {α: Type u} [R: CommRing α] {β: Set α}
 
 -- Multiplicative localization of a commutative ring.
 
--- Lift the lower operation "addition" to the quotient.
--- First define the operation on α × β.
+-- Define the lower operation "addition" on α × β.
 
 def quotient.lower.op_pre (h: R.toMulMonoid.sub β): Op (α × β) :=
   λ (a₁, ⟨a₂, h₁⟩) (b₁, ⟨b₂, h₂⟩) ↦ (a₁ * b₂ + b₁ * a₂, ⟨a₂ * b₂, h.op_closed a₂ b₂ h₁ h₂⟩)
 
--- Then prove it is well defined on the quotient,
--- i.e. if a ≈ c and b ≈ d, then a + b ≈ c + d.
+-- Prove if a ≈ c and b ≈ d, then a + b ≈ c + d.
 
 theorem quotient.lower.op_lifts (h: R.toMulMonoid.sub β): ∀ a b c d: (α × β), a ≈ c → b ≈ d → Quotient.mk (setoid h) (quotient.lower.op_pre h a b) = Quotient.mk (setoid h) (quotient.lower.op_pre h c d) := by
   intro ⟨a₁, a₂⟩ ⟨b₁, b₂⟩ ⟨c₁, c₂⟩ ⟨d₁, d₂⟩ ⟨t₁, ht₁₁, ht₁₂⟩ ⟨t₂, ht₂₁, ht₂₂⟩
@@ -423,14 +392,12 @@ theorem quotient.lower.op_lifts (h: R.toMulMonoid.sub β): ∀ a b c d: (α × �
 def quotient.lower.op (h: R.toMulMonoid.sub β): Op (quotient h) :=
   λ x y ↦ Quotient.liftOn₂ x y _ (quotient.lower.op_lifts h)
 
--- Lift the operation "inverse" to the quotient.
--- First define the operation on α × β.
+-- Define the (additive) inverse operation on α × β.
 
 def quotient.lower.inv_pre: α × β → α × β :=
   λ (a₁, a₂) ↦ (-a₁, a₂)
 
--- Then prove it is well defined on the quotient,
--- i.e. if a ≈ b, then a⁻¹ ≈ b⁻¹
+-- Prove if a ≈ b, then -a ≈ -b.
 
 theorem quotient.lower.inv_lifts (h: R.toMulMonoid.sub β): ∀ a b: (α × β), a ≈ b → Quotient.mk (setoid h) (quotient.lower.inv_pre a) = Quotient.mk (setoid h) (quotient.lower.inv_pre b) := by
   intro ⟨a₁, a₂⟩ ⟨b₁, b₂⟩ ⟨t, ht₁, ht₂⟩
@@ -444,8 +411,8 @@ theorem quotient.lower.inv_lifts (h: R.toMulMonoid.sub β): ∀ a b: (α × β),
 def quotient.lower.inv (h: R.toMulMonoid.sub β): quotient h → quotient h :=
   λ x ↦ Quotient.liftOn x _ (quotient.lower.inv_lifts h)
 
--- Prove that he multiplicative localization of a commutative ring
--- wrt. multiplication is a commutative ring.
+-- Prove that the localization of a commutative ring wrt. multiplication is a
+-- commutative ring.
 
 instance Localization.multiplicative [R: CommRing α] (h: R.toMulMonoid.sub β): CommRing (quotient h) := {
   mul       := (Localization h).op
@@ -465,12 +432,7 @@ instance Localization.multiplicative [R: CommRing α] (h: R.toMulMonoid.sub β):
     · exact h.unit_mem
     · calc
         ((a₁ * b₂ + b₁ * a₂) * c₂ + c₁ * (a₂ * b₂)) * (a₂ * (b₂ * c₂)) * 1
-        _ = ((a₁ * b₂ * c₂ + b₁ * a₂ * c₂) + c₁ * (a₂ * b₂)) * (a₂ * (b₂ * c₂)) * 1   := by simp [distrib_right]
-        _ = (a₁ * (b₂ * c₂) + b₁ * (a₂ * c₂) + c₁ * (a₂ * b₂)) * (a₂ * (b₂ * c₂)) * 1 := by simp [mul_assoc]
-        _ = (a₁ * (b₂ * c₂) + b₁ * (c₂ * a₂) + c₁ * (b₂ * a₂)) * (a₂ * (b₂ * c₂)) * 1 := by simp [mul_comm]
-        _ = (a₁ * (b₂ * c₂) + (b₁ * c₂ * a₂ + c₁ * b₂ * a₂)) * (a₂ * (b₂ * c₂)) * 1   := by simp [mul_assoc, add_assoc]
-        _ = (a₁ * (b₂ * c₂) + (b₁ * c₂ + c₁ * b₂) * a₂) * (a₂ * (b₂ * c₂)) * 1        := by simp [distrib_right]
-        _ = (a₁ * (b₂ * c₂) + (b₁ * c₂ + c₁ * b₂) * a₂) * (a₂ * b₂ * c₂) * 1          := by simp [mul_assoc]
+        _ = (a₁ * (b₂ * c₂) + (b₁ * c₂ + c₁ * b₂) * a₂) * (a₂ * b₂ * c₂) * 1 := by simp_semiring
   add_zero := by
     constructor <;> (
       intro x
@@ -581,23 +543,11 @@ theorem quotient.le_lifts_imp (h: order_compatible M P): ∀ a b c d: (α × β)
   exists t'
   calc
     c₁ + d₂ + (b₁ + t₂ + a₂ + t₁ + t)
-    _ = c₁ + (((d₂ + b₁) + t₂) + (a₂ + t₁)) + t   := by simp [op_assoc]
-    _ = c₁ + ((a₂ + t₁) + ((b₁ + d₂) + t₂)) + t   := by simp [op_comm]
-    _ = (c₁ + a₂ + t₁) + (b₁ + d₂ + t₂) + t       := by simp [op_assoc]
-    _ = (a₁ + c₂ + t₁) + (d₁ + b₂ + t₂) + t       := by rw [ht₁₂, ht₂₂]
-    _ = a₁ + ((((c₂ + (t₁ + d₁)) + b₂) + t₂) + t) := by simp [op_assoc]
-    _ = a₁ + (t + ((b₂ + (c₂ + (d₁ + t₁))) + t₂)) := by simp [op_comm]
-    _ = (a₁ + (t + b₂)) + (c₂ + d₁ + t₁ + t₂)     := by simp [op_assoc]
-    _ = (a₁ + (b₂ + t)) + (c₂ + d₁ + t₁ + t₂)     := by simp [op_comm]
-    _ = (a₁ + b₂ + t) + (c₂ + d₁ + t₁ + t₂)       := by simp [op_assoc]
-    _ ≤ (b₁ + a₂ + t) + (c₂ + d₁ + t₁ + t₂)       := by apply h ht
-    _ = b₁ + a₂ + (t + ((c₂ + d₁) + (t₁ + t₂)))   := by simp [op_assoc]
-    _ = b₁ + a₂ + (((d₁ + c₂) + (t₂ + t₁)) + t)   := by simp [op_comm]
-    _ = ((b₁ + a₂) + (d₁ + c₂)) + t₂ + t₁ + t     := by simp [op_assoc]
-    _ = ((d₁ + c₂) + (b₁ + a₂)) + t₂ + t₁ + t     := by simp [op_comm]
-    _ = d₁ + c₂ + (b₁ + (a₂ + t₂)) + t₁ + t       := by simp [op_assoc]
-    _ = d₁ + c₂ + (b₁ + (t₂ + a₂)) + t₁ + t       := by simp [op_comm]
-    _ = d₁ + c₂ + (b₁ + t₂ + a₂ + t₁ + t)         := by simp [op_assoc]
+    _ = (c₁ + a₂ + t₁) + (b₁ + d₂ + t₂) + t := by simp_monoid
+    _ = (a₁ + c₂ + t₁) + (d₁ + b₂ + t₂) + t := by rw [ht₁₂, ht₂₂]
+    _ = (a₁ + b₂ + t) + (c₂ + d₁ + t₁ + t₂) := by simp_monoid
+    _ ≤ (b₁ + a₂ + t) + (c₂ + d₁ + t₁ + t₂) := by apply h ht
+    _ = d₁ + c₂ + (b₁ + t₂ + a₂ + t₁ + t)   := by simp_monoid
 
 theorem quotient.le_lifts (h: order_compatible M P) (hB: M.sub β): ∀ a b c d: (α × β), a ≈ c → b ≈ d → quotient.le_pre a b = quotient.le_pre c d := by
   intro a b c d h₁ h₂
@@ -624,31 +574,11 @@ theorem quotient.mul_le_lifts_imp (h: order_compatible M P): ∀ a b c d: (α ×
   exists t'
   calc
     c₁ + c₂ + d₂ + d₂ + (a₂ + a₂ + b₁ + b₂ + t₁ + t₂ + t)
-    _ = c₁ + (((c₂ + d₂ + d₂) + a₂) + ((a₂ + (b₁ + b₂)) + t₁) + t₂ + t)   := by simp [op_assoc]
-    _ = c₁ + (a₂ + ((c₂ + d₂ + d₂)) + (t₁ + (a₂ + (b₂ + b₁))) + t₂ + t)   := by simp [op_comm]
-    _ = ((c₁ + a₂) + ((c₂ + d₂ + d₂) + t₁)) + ((a₂ + b₂) + (b₁ + t₂)) + t := by simp [op_assoc]
-    _ = ((c₁ + a₂) + (t₁ + (c₂ + d₂ + d₂))) + ((b₁ + t₂) + (a₂ + b₂)) + t := by simp [op_comm]
-    _ = (c₁ + a₂ + t₁) + ((c₂ + d₂) + (d₂ + b₁ + t₂)) + a₂ + b₂ + t       := by simp [op_assoc]
-    _ = (c₁ + a₂ + t₁) + ((d₂ + b₁ + t₂) + (c₂ + d₂)) + a₂ + b₂ + t       := by simp [op_comm]
-    _ = (c₁ + a₂ + t₁) + ((d₂ + b₁) + t₂) + ((c₂ + d₂) + (a₂ + b₂)) + t   := by simp [op_assoc]
-    _ = (c₁ + a₂ + t₁) + ((b₁ + d₂) + t₂) + ((a₂ + b₂) + (c₂ + d₂)) + t   := by simp [op_comm]
-    _ = (c₁ + a₂ + t₁) + (b₁ + d₂ + t₂) + (a₂ + b₂ + c₂ + d₂ + t)         := by simp [op_assoc]
-    _ = (a₁ + c₂ + t₁) + (d₁ + b₂ + t₂) + (a₂ + b₂ + c₂ + d₂ + t)         := by rw [ht₁₂, ht₂₂]
-    _ = a₁ + ((c₂ + ((t₁ + (d₁ + b₂))) + t₂) + a₂) + b₂ + c₂ + d₂ + t     := by simp [op_assoc]
-    _ = a₁ + (a₂ + (c₂ + (((d₁ + b₂)) + t₁) + t₂)) + b₂ + c₂ + d₂ + t     := by simp [op_comm]
-    _ = a₁ + a₂ + ((((c₂ + d₁) + b₂) + t₁ + t₂) + b₂) + c₂ + d₂ + t       := by simp [op_assoc]
-    _ = a₁ + a₂ + (b₂ + ((b₂ + (c₂ + d₁)) + t₁ + t₂)) + c₂ + d₂ + t       := by simp [op_comm]
-    _ = a₁ + a₂ + b₂ + b₂ + ((c₂ + d₁ + ((t₁ + t₂) + (c₂ + d₂))) + t )    := by simp [op_assoc]
-    _ = a₁ + a₂ + b₂ + b₂ + (t + (c₂ + d₁ + ((c₂ + d₂) + (t₁ + t₂))))     := by simp [op_comm]
-    _ = a₁ + a₂ + b₂ + b₂ + t + c₂ + (d₁ + c₂) + d₂ + t₁ + t₂             := by simp [op_assoc]
-    _ = a₁ + a₂ + b₂ + b₂ + t + c₂ + (c₂ + d₁) + d₂ + t₁ + t₂             := by simp [op_comm]
-    _ = (a₁ + a₂ + b₂ + b₂ + t) + (c₂ + c₂ + d₁ + d₂ + t₁ + t₂)           := by simp [op_assoc]
-    _ ≤ (b₁ + a₂ + a₂ + b₂ + t) + (c₂ + c₂ + d₁ + d₂ + t₁ + t₂)           := by apply h ht
-    _ = (((b₁ + (a₂ + a₂)) + b₂ + t) + (((c₂ + c₂) + d₁) + d₂)) + t₁ + t₂ := by simp [op_assoc]
-    _ = (((d₁ + (c₂ + c₂)) + d₂) + (((a₂ + a₂) + b₁) + b₂ + t)) + t₁ + t₂ := by simp [op_comm]
-    _ = d₁ + c₂ + c₂ + d₂ + a₂ + a₂ + b₁ + b₂ + (t + (t₁ + t₂))           := by simp [op_assoc]
-    _ = d₁ + c₂ + c₂ + d₂ + a₂ + a₂ + b₁ + b₂ + ((t₁ + t₂) + t)           := by simp [op_comm]
-    _ = d₁ + c₂ + c₂ + d₂ + (a₂ + a₂ + b₁ + b₂ + t₁ + t₂ + t)             := by simp [op_assoc]
+    _ = (c₁ + a₂ + t₁) + (b₁ + d₂ + t₂) + (a₂ + b₂ + c₂ + d₂ + t) := by simp_monoid
+    _ = (a₁ + c₂ + t₁) + (d₁ + b₂ + t₂) + (a₂ + b₂ + c₂ + d₂ + t) := by rw [ht₁₂, ht₂₂]
+    _ = (a₁ + a₂ + b₂ + b₂ + t) + (c₂ + c₂ + d₁ + d₂ + t₁ + t₂)   := by simp_monoid
+    _ ≤ (b₁ + a₂ + a₂ + b₂ + t) + (c₂ + c₂ + d₁ + d₂ + t₁ + t₂)   := by apply h ht
+    _ = d₁ + c₂ + c₂ + d₂ + (a₂ + a₂ + b₁ + b₂ + t₁ + t₂ + t)     := by simp_monoid
 
 theorem quotient.mul_le_lifts (h: order_compatible M P) (hB: M.sub β): ∀ a b c d: (α × β), a ≈ c → b ≈ d → quotient.mul_le_pre a b = quotient.mul_le_pre c d := by
   intro a b c d h₁ h₂
