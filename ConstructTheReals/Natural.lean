@@ -212,7 +212,7 @@ instance NaturalSemiring: CommSemiring ℕ := {
   mul_assoc := mul_assoc
   mul_one := ⟨mul_one_left, mul_one_right⟩
   distrib := ⟨distrib_left, distrib_right⟩
-  mul_comm := sorry
+  mul_comm := mul_comm
 }
 
 

@@ -30,8 +30,6 @@ In the former case, multiplication is called the "upper" operation
 in the latter, addition is called the "lower" operation.
 
 TODO:
-- Prove when R is a semiring and S = R then R/S is a ring.
-- Prove when R is an integral domain and S = R \ {0} then R/S is a field.
 - How to systematically lift order structure?
 - (Subobject) Construct an embedding R -> R/S sending x to (x, unit).
 - (Idempotence) Prove if G is already a group then G/G is isomorphic to G.
@@ -102,7 +100,7 @@ def quotient (h: M.sub β): Type u :=
 def quotient.unit (h: M.sub β): quotient h :=
   Quotient.mk _ (0, ⟨0, h.unit_mem⟩)
 
--- Lift the operation "add" to the quotient.
+-- Lift the operation to the quotient.
 -- First define the operation on α × β.
 
 def quotient.op_pre (h: M.sub β): Op (α × β) :=
@@ -176,7 +174,7 @@ def setoid.full: Setoid (α × @Set.full α) :=
 abbrev quotient.full (α: Type u) [M: CommMonoid α]: Type u :=
   quotient M.full_sub
 
--- Define the inverse the operation on α × β.
+-- Define the additive inverse operation on α × β.
 
 def quotient.inv_pre: α × @Set.full α → α × @Set.full α :=
   λ (a₁, a₂) ↦ (a₂, ⟨a₁, by trivial⟩)
@@ -385,8 +383,14 @@ theorem quotient.lower.op_lifts (h: R.toMulMonoid.sub β): ∀ a b c d: (α × �
   · apply h.op_closed
     · exact ht₁₁
     · exact ht₂₁
-  · -- TODO notation issue..
-    sorry
+  · have ht₁₂: a₁ * c₂ * t₁ = c₁ * a₂ * t₁ := ht₁₂
+    have ht₂₂: b₁ * d₂ * t₂ = d₁ * b₂ * t₂ := ht₂₂
+    calc
+      (((a₁ * b₂ + b₁ * a₂) * (c₂ * d₂))) * (t₁ * t₂)
+      _ = (b₁ * d₂ * t₂) * c₂ * a₂ * t₁ + (a₁ * c₂ * t₁) * b₂ * t₂ * d₂ := by simp_semiring
+      _ = (d₁ * b₂ * t₂) * c₂ * a₂ * t₁ + (c₁ * a₂ * t₁) * b₂ * t₂ * d₂ := by rw [ht₁₂, ht₂₂]
+      _ = ((c₁ * d₂ + d₁ * c₂) * (a₂ * b₂)) * (t₁ * t₂)                 := by simp_semiring
+
 
 
 def quotient.lower.op (h: R.toMulMonoid.sub β): Op (quotient h) :=
@@ -405,8 +409,13 @@ theorem quotient.lower.inv_lifts (h: R.toMulMonoid.sub β): ∀ a b: (α × β),
   exists t
   constructor
   · exact ht₁
-  · -- TODO notation issue..
-    sorry
+  · have ht₂: a₁ * b₂ * t = b₁ * a₂ * t := by exact ht₂
+    calc
+      (-a₁ * b₂) * t
+      _ = -(a₁ * b₂) * t := by rw [mul_neg_left]
+      _ = -(a₁ * b₂ * t) := by repeat rw [mul_neg_left]
+      _ = -(b₁ * a₂ * t) := by rw [ht₂]
+      _ = (-b₁ * a₂) * t := by repeat rw [←mul_neg_left]
 
 def quotient.lower.inv (h: R.toMulMonoid.sub β): quotient h → quotient h :=
   λ x ↦ Quotient.liftOn x _ (quotient.lower.inv_lifts h)
@@ -493,27 +502,37 @@ instance Localization.multiplicative [R: CommRing α] (h: R.toMulMonoid.sub β):
       constructor
       · exact h.unit_mem
     )
-    · -- TODO notation issue..
-      sorry
-    · sorry
+    · calc
+        ((a₁ * ((b₁ * c₂) + (c₁ * b₂))) * ((a₂ * b₂) * (a₂ * c₂))) * 1
+        _ = ((((a₁ * b₁) * (a₂ * c₂)) + ((a₁ * c₁) * (a₂ * b₂))) * (a₂ * (b₂ * c₂))) * 1 := by simp_semiring
+    · calc
+        ((((a₁ * b₂) + (b₁ * a₂)) * c₁) * ((a₂ * c₂) * (b₂ * c₂))) * 1
+        _ = (((a₁ * c₁) * (b₂ * c₂) + (b₁ * c₁) * (a₂ * c₂)) * ((a₂ * b₂) * c₂)) * 1 := by simp_semiring
 }
 
--- TODO: the localization of a commutative ring by all non-zero elements a
--- field (the field of fractions).
+-- Prove that if α is an integral domain, then the localization wrt.
+-- multiplication at α \ {0} is a field (field of fractions).
 
-/-
-synthesized type class instance is not definitionally equal to expression inferred by typing rules, synthesized
-  @instCommMonoidOfCommSemiring α (@CommRing.toCommSemiring α R✝)
-inferred
-  @CommSemiring.toMulMonoid α (@CommRing.toCommSemiring α R.R)
--/
+def setoid.nonzero [I: IntegralDomain α]: Setoid (α × I.nonzero) :=
+  @setoid _ I.toMulMonoid _ I.nonzero_submonoid
 
--- instance Localization.field_of_fractions [R: IntegralDomain α]: Field (quotient R.nonzero_submonoid) :=
---   sorry
+abbrev quotient.nonzero (α: Type u) [I: IntegralDomain α]: Type u :=
+  @quotient _ I.toMulMonoid _ I.nonzero_submonoid
+
+-- Define the multiplicative inverse operation on α \ {0} × α \ {0}.
+-- 0 = [(0, 1)] does not get an inverse.
+
+def quotient.upper.inv_pre [I: IntegralDomain α]: (I.nonzero × I.nonzero) → (I.nonzero × I.nonzero) :=
+  λ (a₁, a₂) ↦ (a₂, a₁)
+
+-- TODO Prove if a ≈ b, then a⁻¹ ≈ b⁻¹
+
+instance Localization.field_of_fractions [I: IntegralDomain α]: Field (quotient.nonzero α) := {
+  inv := sorry
+  mul_inverses := sorry
+}
 
 end Multiplicative
-
-
 
 section OrderLift
 

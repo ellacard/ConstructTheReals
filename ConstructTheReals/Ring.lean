@@ -268,6 +268,9 @@ class IntegralDomain (α: Type u) extends R: CommRing α where
   no_zero_divisors: R.NoZeroDivisors
   nontrivial: ¬ R.trivial
 
+def IntegralDomain.nonzero {α: Type u} [IntegralDomain α]: Set α :=
+  λ x ↦ x ≠ 0
+
 theorem IntegralDomain.nonzero_submonoid {α: Type u} [R: IntegralDomain α]: R.toMulMonoid.sub (λ r ↦ r ≠ 0) := {
   unit_mem := Ne.symm nontrivial
   op_closed := no_zero_divisors

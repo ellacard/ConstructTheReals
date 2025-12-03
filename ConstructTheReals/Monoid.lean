@@ -86,7 +86,7 @@ theorem ngen_inverses [Monoid α] {a b: α} (n: Nat) (h: a + b = 0): n • a + n
   | succ p hp => rw [ngen_succ', ngen_succ, op_assoc, ←op_assoc (p • a), hp, op_unit_left, h]
 
 
-theorem inverses_unique [Monoid M] {a b b': M}
+theorem inverses_unique [Monoid α] {a b b': α}
   (h: inverses a b) (h': inverses a b'): b = b' := by
   simp_all [inverses_iff]
   calc
