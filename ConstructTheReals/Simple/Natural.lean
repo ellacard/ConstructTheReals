@@ -1,5 +1,13 @@
 /-
-Construction of the natural numbers ℕ.
+
+Definition of the natural numbers ℕ as an inductive type.
+
+Properties:
+- (ℕ, +) is a cancellative commutative monoid
+- (ℕ, *) is a commutative monoid
+- (ℕ, +, *) is a semiring
+- (ℕ, ≤) is a lattice
+
 -/
 
 inductive ℕ where
@@ -21,9 +29,12 @@ theorem zero_eq: zero = 0 := by
 theorem one_eq: one = 1 := by
   rfl
 
+theorem one_eq_next_zero: next 0 = 1 := by
+  rfl
 
 
--- Show (ℕ, +) is a cancellative commutative monoid.
+
+-- Define addition.
 
 def add (a b: ℕ): ℕ :=
   match b with
@@ -32,33 +43,31 @@ def add (a b: ℕ): ℕ :=
 
 instance: Add ℕ := ⟨add⟩
 
-theorem add_next_left {a b: ℕ}: a.next + b = (a + b).next := by
-  induction b with
-  | zero => rfl
-  | next p hp =>
-    sorry
+-- Show (ℕ, +) is a cancellative commutative monoid.
+
+theorem next_eq_iff {a b: ℕ}: a.next = b.next ↔ a = b := by
+  exact Eq.to_iff (next.injEq a b)
 
 theorem add_next_right {a b: ℕ}: a + b.next = (a + b).next := by
   induction a with
   | zero => rfl
-  | next p hp =>
-    sorry
+  | next p hp => rfl
 
-theorem next_eq_iff {a b: ℕ}: a = b ↔ a.next = b.next := by
-  constructor
-  · intro h
-    exact congrArg next h
-  · intro h
-    sorry
+theorem add_next_left {a b: ℕ}: a.next + b = (a + b).next := by
+  induction b with
+  | zero => rfl
+  | next p hp =>
+    repeat rw [add_next_right]
+    rw [hp]
+
+theorem add_zero_right (a: ℕ): a + 0 = a := by
+  rfl
 
 theorem add_zero_left (a: ℕ): 0 + a = a := by
   induction a with
   | zero => rfl
   | next p hp =>
     rw [add_next_right, hp]
-
-theorem add_zero_right (a: ℕ): a + 0 = a := by
-  rfl
 
 theorem add_comm (a b: ℕ): a + b = b + a := by
   induction a with
@@ -76,6 +85,15 @@ theorem add_assoc (a b c: ℕ): a + b + c = a + (b + c) := by
     repeat rw [add_next_left]
     rw [hp]
 
+theorem add_cancel_right {a b: ℕ} (c: ℕ) (h: a + c = b + c): a = b := by
+  induction c with
+  | zero =>
+    repeat rw [add_zero_right] at h
+    exact h
+  | next p hp =>
+    apply hp
+    exact next_eq_iff.mp h
+
 theorem add_cancel_left (a: ℕ) {b c: ℕ} (h: a + b = a + c): b = c := by
   induction a with
   | zero =>
@@ -85,16 +103,7 @@ theorem add_cancel_left (a: ℕ) {b c: ℕ} (h: a + b = a + c): b = c := by
   | next p hp =>
     apply hp
     repeat rw [add_next_left] at h
-    exact next_eq_iff.mpr h
-
-theorem add_cancel_right {a b: ℕ} (c: ℕ) (h: a + c = b + c): a = b := by
-  induction c with
-  | zero =>
-    repeat rw [add_zero_right] at h
-    exact h
-  | next p hp =>
-    apply hp
-    exact next_eq_iff.mpr h
+    exact next_eq_iff.mp h
 
 theorem add_zero_eq_zero {a b: ℕ} (h: a + b = 0): a = 0 := by
   induction b with
@@ -103,7 +112,7 @@ theorem add_zero_eq_zero {a b: ℕ} (h: a + b = 0): a = 0 := by
 
 
 
--- Show (ℕ, *) is a commutative monoid.
+-- Define multiplication.
 
 def mul (a b: ℕ): ℕ :=
   match b with
@@ -112,66 +121,76 @@ def mul (a b: ℕ): ℕ :=
 
 instance: Mul ℕ := ⟨mul⟩
 
-theorem mul_one_left (a: ℕ): 1 * a = a := by
-  induction a with
-  | zero => rfl
-  | next p hp => exact Eq.symm (congrArg next (Eq.symm hp))
+-- Show (ℕ, *) is a commutative monoid.
 
 theorem mul_one_right (a: ℕ): a * 1 = a := by
   induction a with
   | zero => rfl
   | next p hp => exact Eq.symm (congrArg next (Eq.symm hp))
 
-theorem mul_zero_left (a: ℕ): 0 * a = 0 := by
+theorem mul_one_left (a: ℕ): 1 * a = a := by
   induction a with
   | zero => rfl
-  | next p hp => exact hp
+  | next p hp => exact Eq.symm (congrArg next (Eq.symm hp))
 
 theorem mul_zero_right (a: ℕ): a * 0 = 0 := by
   induction a with
   | zero => rfl
   | next p hp => exact hp
 
-theorem mul_next_left (a b: ℕ): a.next * b = a * b + b := by
-  sorry
+theorem mul_zero_left (a: ℕ): 0 * a = 0 := by
+  induction a with
+  | zero => rfl
+  | next p hp => exact hp
 
 theorem mul_next_right (a b: ℕ): a * b.next = a + a * b := by
-  sorry
+  induction b with
+  | zero =>
+    rw [zero_eq, one_eq_next_zero, mul_one_right, mul_zero_right, add_zero_right]
+  | next p hp =>
+    rw [hp]
+    have : a * p.next.next = a * p.next + a := by rfl
+    rw [this]
+    rw [hp]
+    exact Eq.symm (add_comm a (a + a * p))
 
-theorem mul_assoc (a b c: ℕ): a * b * c = a * (b * c) := by
-  sorry
+theorem mul_next_left (a b: ℕ): a.next * b = a * b + b := by
+  induction b with
+  | zero =>
+    rw [zero_eq]
+    repeat rw [mul_zero_right]
+    rw [add_zero_right]
+  | next p hp =>
+    repeat rw [mul_next_right]
+    repeat rw [add_next_left, add_next_right]
+    rw [hp]
+    apply next_eq_iff.mpr
+    rw [add_assoc]
 
 theorem mul_comm (a b: ℕ): a * b = b * a := by
   induction a with
   | zero => rw [zero_eq, mul_zero_left, mul_zero_right]
   | next p hp => rw [mul_next_left, mul_next_right, hp, add_comm]
 
-theorem mul_cancel_left {a b c: ℕ} (h: a * b = a * c) (ha: a ≠ 0): b = c := by
-  induction a with
-  | zero => contradiction
+theorem mul_assoc (a b c: ℕ): a * b * c = a * (b * c) := by
+  induction c with
+  | zero =>
+    rw [zero_eq]
+    repeat rw [mul_zero_right]
   | next p hp =>
+    repeat rw [mul_next_right]
+    rw [hp]
     sorry
 
 theorem mul_cancel_right {a b c: ℕ} (h: a * c = b * c) (hc: c ≠ 0): a = b := by
-  induction c with
-  | zero => contradiction
-  | next p hp =>
-    sorry
+  sorry
+
+theorem mul_cancel_left {a b c: ℕ} (h: a * b = a * c) (ha: a ≠ 0): b = c := by
+  sorry
 
 
 
--- Show (ℕ, +, *) is a semiring
-
-theorem distrib_left (a b c: ℕ): a * (b + c) = a * b + a * c := by
-  induction a with
-  | zero =>
-    rw [zero_eq]
-    repeat rw [mul_zero_left]
-    rw [add_zero_left]
-  | next p hp =>
-    repeat rw [mul_next_left]
-    rw [hp]
-    sorry
+-- Show (ℕ, +, *) is a semiring.
 
 theorem distrib_right (a b c: ℕ): (a + b) * c = a * c + b * c := by
   induction c with
@@ -184,9 +203,20 @@ theorem distrib_right (a b c: ℕ): (a + b) * c = a * c + b * c := by
     rw [hp]
     sorry
 
+theorem distrib_left (a b c: ℕ): a * (b + c) = a * b + a * c := by
+  induction a with
+  | zero =>
+    rw [zero_eq]
+    repeat rw [mul_zero_left]
+    rw [add_zero_left]
+  | next p hp =>
+    repeat rw [mul_next_left]
+    rw [hp]
+    sorry
 
 
--- Show (ℕ, ≤) is a lattice.
+
+-- Define an order ≤ on ℕ.
 
 def le (a b: ℕ): Prop :=
   ∃ d, a + d = b
@@ -196,6 +226,8 @@ instance: LE ℕ := ⟨le⟩
 instance {X: Type u} [LE X]: LT X := {
   lt := λ x y ↦ x ≤ y ∧ ¬ y ≤ x
 }
+
+-- Show (ℕ, ≤) is a lattice.
 
 theorem le_refl (a: ℕ): a ≤ a := by
   exists 0
@@ -241,10 +273,11 @@ theorem le_add {a b c: ℕ} (h: a ≤ b): a + c ≤ b + c := by
 instance: DecidableEq ℕ := sorry
 instance: ∀ a b: ℕ, Decidable (a ≤ b) := sorry
 
-theorem not_le_lt {a b: ℕ} (h: ¬ a ≤ b): b < a := by
+theorem not_le_lt {a b: ℕ} (h: ¬a ≤ b): b < a := by
+
   sorry
 
-theorem not_le_le {a b: ℕ} (h: ¬ a ≤ b): b ≤ a := by
+theorem not_le_le {a b: ℕ} (h: ¬a ≤ b): b ≤ a := by
   exact (not_le_lt h).left
 
 def min (a b: ℕ): ℕ :=
