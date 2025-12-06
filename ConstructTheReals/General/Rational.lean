@@ -1,7 +1,7 @@
-import ConstructTheReals.Field
-import ConstructTheReals.Integer
-import ConstructTheReals.Localization
-import ConstructTheReals.MetricSpace
+import ConstructTheReals.General.Field
+import ConstructTheReals.General.Integer
+import ConstructTheReals.General.Localization
+import ConstructTheReals.General.MetricSpace
 
 /-
 

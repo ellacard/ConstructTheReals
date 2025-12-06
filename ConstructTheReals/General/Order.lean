@@ -1,5 +1,7 @@
-import ConstructTheReals.Function
-import ConstructTheReals.Relation
+import ConstructTheReals.General.Relation
+
+def switch (f: α → β → γ): β → α → γ :=
+  λ b a ↦ f a b
 
 variable {α: Type u} {β: Type v} {γ: Type w}
 

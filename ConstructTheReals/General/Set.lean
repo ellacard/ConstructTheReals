@@ -1,5 +1,5 @@
-import ConstructTheReals.Logic
-import ConstructTheReals.Operation
+import ConstructTheReals.General.Logic
+import ConstructTheReals.General.Operation
 
 variable {α: Type u} {β: Type v} {γ: Type w}
 

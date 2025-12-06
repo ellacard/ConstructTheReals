@@ -1,5 +1,5 @@
-import ConstructTheReals.MetricSpace
-import ConstructTheReals.Rational
+import ConstructTheReals.General.MetricSpace
+import ConstructTheReals.General.Rational
 
 /-
 

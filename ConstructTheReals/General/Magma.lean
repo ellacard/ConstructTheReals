@@ -1,5 +1,4 @@
-import ConstructTheReals.Function
-import ConstructTheReals.Set
+import ConstructTheReals.General.Set
 
 variable {α: Type u} {β: Type v} {γ: Type w}
 

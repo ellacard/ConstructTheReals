@@ -1,5 +1,5 @@
-import ConstructTheReals.Field
-import ConstructTheReals.Order
+import ConstructTheReals.General.Field
+import ConstructTheReals.General.Order
 
 /-
 

@@ -1,5 +1,5 @@
-import ConstructTheReals.Magma
-import ConstructTheReals.Pointed
+import ConstructTheReals.General.Magma
+import ConstructTheReals.General.Pointed
 
 variable {α: Type u₁} {β: Type u₂}
 

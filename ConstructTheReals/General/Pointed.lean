@@ -1,5 +1,4 @@
-import ConstructTheReals.Function
-import ConstructTheReals.Set
+import ConstructTheReals.General.Set
 
 variable {α: Type u} {β: Type v} {γ: Type w}
 
@@ -16,7 +15,3 @@ open Pointed
 
 class Pointed.sub (P: Pointed α) (S: Set α): Prop where
   unit_mem: 0 ∈ S
-
-theorem Pointed.sub.full (P: Pointed α): P.sub Set.full := {
-  unit_mem := trivial
-}

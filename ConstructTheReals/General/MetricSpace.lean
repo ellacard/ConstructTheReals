@@ -1,5 +1,5 @@
-import ConstructTheReals.Monoid
-import ConstructTheReals.Order
+import ConstructTheReals.General.Monoid
+import ConstructTheReals.General.Order
 
 variable {X: Type u} {D: Type v}
 
@@ -253,6 +253,7 @@ def Complete (d: Metric X D): Prop :=
 abbrev Endometric (D: Type u) [DistanceSpace D]: Type u :=
   Metric D D
 
+-- TODO incorrect definition, this doesn't require sequences to be cauchy
 def CauchyRelation (d₀: Endometric D) (d: Metric X D): Endorelation (Sequence X) :=
   λ a b ↦ ConvergesTo d₀ (λ n ↦ d (a n) (b n)) ⊥
 

@@ -1,5 +1,5 @@
-import ConstructTheReals.Localization
-import ConstructTheReals.Natural
+import ConstructTheReals.General.Localization
+import ConstructTheReals.General.Natural
 
 /-
 
@@ -30,12 +30,12 @@ instance: CommGroup ℤ :=
 instance: CommRing ℤ :=
   sorry
 
-example: Localization.order_compatible Natural.NaturalSemiring.toAddMonoid Natural.NaturalLattice.toPartialOrder := by
+example: Localization.order_compatible NaturalSemiring.toAddMonoid NaturalLattice.toPartialOrder := by
   intro a b c h₁
-  exact Natural.le_add h₁
+  exact ℕ.le_add h₁
 
 instance: Lattice ℤ := {
-  le := sorry -- quotient.le
+  le := sorry
   reflexive := sorry
   transitive := sorry
   antisymmetric := sorry

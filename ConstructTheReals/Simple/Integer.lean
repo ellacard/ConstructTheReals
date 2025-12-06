@@ -1,4 +1,4 @@
-import ConstructTheReals.Simple.Natural
+import ConstructTheReals.Natural
 
 def ℤ: Type := @Quotient (ℕ × ℕ) {
   r := λ (a₁, a₂) (b₁, b₂) ↦ a₁ + b₂ = b₁ + a₂
