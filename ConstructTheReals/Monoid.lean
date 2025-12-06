@@ -27,13 +27,6 @@ namespace Monoid
 scoped instance [Magma α]: Add α := ⟨op⟩
 scoped instance [Pointed α]: Zero α := ⟨Pointed.unit⟩
 
-def ngen [Monoid α] (n: Nat) (a: α): α :=
-  match n with
-  | Nat.zero => 0
-  | Nat.succ p => (ngen p a) + a
-
-instance [Monoid α]: SMul Nat α := ⟨ngen⟩
-
 end Monoid
 open Monoid
 
@@ -53,38 +46,6 @@ def inverses [Monoid α] (a b: α): Prop :=
 
 def inverses_iff [Monoid α] (a b: α): inverses a b ↔ a + b = 0 ∧ b + a = 0 := by
   rfl
-
--- Define natural multiplication in a monoid.
-
-theorem ngen_zero [Monoid α] (a: α): 0 • a = (0: α) := by
-  rfl
-
-theorem ngen_succ [Monoid α] (a: α) (n: Nat): (n + 1) • a = (n • a) + a := by
-  rfl
-
-theorem ngen_one [Monoid α] (a: α): 1 • a = a := by
-  rw [ngen_succ, ngen_zero, op_unit_left]
-
-theorem ngen_two [Monoid α] (a: α): 2 • a = a + a := by
-  rw [ngen_succ, ngen_one]
-
-theorem ngen_add [Monoid α] (a: α) (m n: Nat): m • a + n • a = (m + n) • a := by
-  induction n with
-  | zero => rw [ngen_zero, op_unit_right, Nat.add_zero]
-  | succ _ hp => rw [ngen_succ, ←op_assoc, hp, ←Nat.add_assoc, ngen_succ]
-
-theorem ngen_succ' [Monoid α] (a: α) (n: Nat): (n + 1) • a = a + (n • a) := by
-  calc
-    (n + 1) • a
-    _ = (1 + n) • a := by rw [Nat.add_comm]
-    _ = 1 • a + n • a := by rw [ngen_add]
-    _ = a + n • a := by rw [ngen_one]
-
-theorem ngen_inverses [Monoid α] {a b: α} (n: Nat) (h: a + b = 0): n • a + n • b = 0 := by
-  induction n with
-  | zero => simp [ngen_zero, op_unit_left]
-  | succ p hp => rw [ngen_succ', ngen_succ, op_assoc, ←op_assoc (p • a), hp, op_unit_left, h]
-
 
 theorem inverses_unique [Monoid α] {a b b': α}
   (h: inverses a b) (h': inverses a b'): b = b' := by
@@ -106,16 +67,6 @@ theorem left_right_inverse_eq [Monoid α] {a b c: α}
     _ = 0 + c       := by rw [h₁]
     _ = c           := by rw [op_unit_left]
 
--- A monoid homomorphism preserves the unit and the binary operation.
-
-class Monoid.hom (M₁: Monoid α) (M₂: Monoid β) extends
-  toPointedHom: Pointed.hom M₁.toPointed M₂.toPointed,
-  toMagmaHom: Magma.hom M₁.toMagma M₂.toMagma
-
-instance Monoid.hom.coeFun [M₁: Monoid α] [M₂: Monoid β]: CoeFun (Monoid.hom M₁ M₂) (λ _ ↦ α → β) := {
-  coe f := f.map
-}
-
 -- A submonoid is a subset which contains the unit and is closed under the operation.
 
 class Monoid.sub (M: Monoid α) (S: Set α) extends
@@ -127,19 +78,6 @@ theorem Monoid.full_sub (M: Monoid α): M.sub Set.full := {
   op_closed := by
     intros
     trivial
-}
-
--- The image of a monoid homomorphism is a submonoid.
-
-theorem Monoid.hom.image_sub {M₁: Monoid α} {M₂: Monoid β} (f: hom M₁ M₂): M₂.sub (Set.range f) := {
-  unit_mem := (Pointed.hom.image_sub f.toPointedHom).unit_mem
-  op_closed := (Magma.hom.image_sub f.toMagmaHom).op_closed
-}
-
-def Monoid.opposite (M: Monoid α): Monoid α := {
-  op := M.toMagma.opposite.op
-  identity := ⟨identity.right, identity.left⟩
-  assoc := by intro x y z; exact Eq.symm (assoc z y x)
 }
 
 -- A zero sum free monoid

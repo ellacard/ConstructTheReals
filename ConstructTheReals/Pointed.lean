@@ -12,26 +12,6 @@ scoped instance [Pointed α]: Zero α := ⟨unit⟩
 end Pointed
 open Pointed
 
--- A pointed set homomorphism preserves the unit.
-
-class Pointed.hom (P₁: Pointed α) (P₂: Pointed β) where
-  map: α → β
-  unit_preserving: map 0 = 0
-
-instance Pointed.hom.coeFun [P₁: Pointed α] [P₂: Pointed β]: CoeFun (Pointed.hom P₁ P₂) (λ _ ↦ α → β) := {
-  coe f := f.map
-}
-
-def Pointed.hom.id (P: Pointed α): hom P P := {
-  map := Function.id
-  unit_preserving := rfl
-}
-
-def Pointed.hom.comp {P₁: Pointed α} {P₂: Pointed β} {P₃: Pointed γ} (f: hom P₁ P₂) (g: hom P₂ P₃): hom P₁ P₃ := {
-  map := g ∘ f
-  unit_preserving := by simp [g.unit_preserving, f.unit_preserving]
-}
-
 -- A sub-pointed set is a set which contains the unit.
 
 class Pointed.sub (P: Pointed α) (S: Set α): Prop where
@@ -39,12 +19,4 @@ class Pointed.sub (P: Pointed α) (S: Set α): Prop where
 
 theorem Pointed.sub.full (P: Pointed α): P.sub Set.full := {
   unit_mem := trivial
-}
-
--- The image of a pointed set homomorphism is a sub-pointed set.
-
-theorem Pointed.hom.image_sub {P₁: Pointed α} {P₂: Pointed β} (f: hom P₁ P₂): P₂.sub (Set.range f) := {
-  unit_mem := by
-    rw [←f.unit_preserving]
-    apply Set.range_mem
 }

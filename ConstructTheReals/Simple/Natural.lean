@@ -1,28 +1,5 @@
-
-
 /-
-
-Construction of the ℕ numbers.
-
-Want to show:
-1. (additive structure)
-  - commutative monoid wrt. addition
-  - cancellative
-2. (multiplicative structure)
-  - commutative monoid wrt. multiplication
-  - cancellative wrt. nonzero elements
-(together 2 and 3 make a commutative semiring)
-3. (order structure)
-  - partial order: reflexive, transitive, antisymmetric
-  - total
-  - a lattice (has max/join and min/meet)
-  - zero is a bottom element
-  - every nonempty set has infimum
-  - every set bounded above has supremum
-
-Notes:
-- Could use an ordered monoid with ⊥ = 0?
-
+Construction of the natural numbers ℕ.
 -/
 
 inductive ℕ where

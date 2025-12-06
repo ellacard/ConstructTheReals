@@ -18,49 +18,7 @@ open Magma
 theorem op_comm [CommMagma α] (a b: α): a + b = b + a := by
   exact CommMagma.comm a b
 
--- A magma homomorphism preserves the operation.
-
-class Magma.hom (M₁: Magma α) (M₂: Magma β) where
-  map: α → β
-  op_preserving: ∀ a b, map (a + b) = map a + map b
-
-instance Magma.hom.coeFun [M₁: Magma α] [M₂: Magma β]: CoeFun (Magma.hom M₁ M₂) (λ _ ↦ α → β) := {
-  coe f := f.map
-}
-
-def Magma.hom.id (M: Magma α): hom M M := {
-  map := Function.id
-  op_preserving := by intros; rfl
-}
-
-def Magma.hom.comp {M₁: Magma α} {M₂: Magma β} {M₃: Magma γ} (f: hom M₁ M₂) (g: hom M₂ M₃): hom M₁ M₃ := {
-  map := g ∘ f
-  op_preserving := by intros; simp [f.op_preserving, g.op_preserving]
-}
-
 -- A submagma is a subset which is closed under the operation.
 
 class Magma.sub (M: Magma α) (S: Set α): Prop where
   op_closed: ∀ a b, a ∈ S → b ∈ S → a + b ∈ S
-
--- The image of a magma homomorphism is a submagma.
-
-theorem Magma.hom.image_sub {M₁: Magma α} {M₂: Magma β} (f: hom M₁ M₂): Magma.sub M₂ (Set.range f) := {
-  op_closed := by
-    intro _ _ ⟨a₁, ha₁⟩ ⟨a₂, ha₂⟩
-    rw [←ha₁, ←ha₂, ←f.op_preserving]
-    apply Set.range_mem
-}
-
--- The opposite magma has the flipped operation.
-
-def Magma.opposite (M: Magma α): Magma α := {
-  op := flip op
-}
-
--- If a magma is commutative, so is its opposite.
-
-def CommMagma.opposite (M: CommMagma α): CommMagma α := {
-  op := (Magma.opposite M.toMagma).op
-  comm := by intro x y; exact comm y x
-}

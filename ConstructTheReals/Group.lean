@@ -24,12 +24,6 @@ scoped instance [Pointed α]: Zero α := ⟨unit⟩
 scoped instance [Group α]: Neg α := ⟨inv⟩
 def opinv [Group α] (a b: α): α := a + -b
 scoped instance [Group α]: Sub α := ⟨opinv⟩
-scoped instance [Group α]: SMul Nat α := ⟨Monoid.ngen⟩
-def zgen [Group α] (k: Int) (a: α): α :=
-  match k with
-  | Int.ofNat n => n • a
-  | Int.negSucc n => n.succ • -a
-instance [Group α]: SMul Int α := ⟨zgen⟩
 
 end Group
 open Group
@@ -95,58 +89,6 @@ theorem inv_invop [Group α] (a b: α): -(a - b) = b - a := by
     _ = a + -a              := by rw [op_unit_left]
     _ = 0                   := by rw [op_inv_right]
 
--- Define integer multiplication in a group.
-
-theorem ngen_neg_left [Group α] (a: α) (n: Nat): n • (-a) + n • a = 0 := by
-  apply ngen_inverses n
-  exact op_inv_left a
-
-theorem ngen_neg_right [Group α] (a: α) (n: Nat): n • a + n • -a = 0 := by
-  apply ngen_inverses n
-  exact op_inv_right a
-
-theorem zgen_zero [Group α] (a: α): (0: Int) • a = (0: α) := by
-  rfl
-
-theorem ngen_inv [Group α] (a: α) (n: Nat): (n • a) + (n • -a) = 0 := by
-  induction n with
-  | zero => simp [ngen_zero, op_unit_left]
-  | succ p hp =>
-    rw [Nat.add_comm, ←ngen_add, ngen_one]
-    rw [Nat.add_comm, ←ngen_add, ngen_one]
-    rw [op_assoc, ←op_assoc (p • a)]
-    rw [hp, op_unit_left, op_inv_right]
-
-theorem zgen_neg' [Group α] (a: α) (n: Int): -(n • a) = n • -a := by
-  apply op_unit_inverses
-  induction n <;> apply ngen_inv
-
-theorem zgen_add [Group α] (a: α) (m n: Int): m • a + n • a = (m + n) • a := by
-  induction m with
-  | ofNat p => induction p with
-    | zero => simp [zgen_zero, op_unit_left]
-    | succ p hp => sorry
-  | negSucc p => sorry
-
-theorem zgen_neg [Group α] (a: α) (n: Int): n • (-a) = -n • a := by
-  induction n with
-  | ofNat p => calc
-    Int.ofNat p • -a
-    _ = p • -a := by rfl
-    _ = -Int.ofNat p • a := sorry
-  | negSucc p => sorry
-
-theorem square_self_zero [Group α] {a: α} (h: 2 • a = a): a = 0 := by
-  calc
-    a
-    _ = 0 + a        := by rw [op_unit_left]
-    _ = (-a + a) + a := by rw [op_inv_left]
-    _ = -a + (a + a) := by rw [op_assoc]
-    _ = -a + (2 • a) := by rw [ngen_two]
-    _ = -a + a       := by rw [h]
-    _ = 0            := by rw [op_inv_left]
-
-
 -- "Socks shoes" property
 
 theorem inv_op [Group α] (a b: α): -(a + b) = -b + -a := by
@@ -162,38 +104,7 @@ theorem inv_op [Group α] (a b: α): -(a + b) = -b + -a := by
     _ = -b + b              := by rw [op_unit_left]
     _ = 0                   := by rw [op_inv_left]
 
--- A group homomorphism is a monoid homomorphism which also preserves inverses.
-
-class Group.hom (G₁: Group α) (G₂: Group β)
-  extends toMonoidHom: Monoid.hom G₁.toMonoid G₂.toMonoid where
-  inv_preserving: ∀ a, map (-a) = -(map a)
-
-instance Group.hom.coeFun [G₁: Group α] [G₂: Group β]: CoeFun (Group.hom G₁ G₂) (λ _ ↦ α → β) := {
-  coe f := f.map
-}
-
 -- A subgroup is a submonoid which is also closed under inverse.
 
 class Group.sub (G: Group α) (S: Set α) extends G.toMonoid.sub S where
   inv_closed: ∀ a, a ∈ S → -a ∈ S
-
--- The image of a group homomorphism is a subgroup.
-
-theorem Group.hom.image_sub (G₁: Group α) (G₂: Group β) (f: hom G₁ G₂): G₂.sub (Set.range f) := {
-  unit_mem := (Monoid.hom.image_sub f.toMonoidHom).unit_mem
-  op_closed := (Monoid.hom.image_sub f.toMonoidHom).op_closed
-  inv_closed := by
-    intro _ ⟨a, ha⟩
-    rw [←ha, ←f.inv_preserving]
-    apply Set.range_mem
-}
-
--- The opposite group.
-
-def Group.opposite (G: Group α): Group α := {
-  op := Group.toMonoid.opposite.op
-  identity := Group.toMonoid.opposite.identity
-  assoc := Group.toMonoid.opposite.assoc
-  inv := inv
-  inverse := ⟨inverse.right, inverse.left⟩
-}

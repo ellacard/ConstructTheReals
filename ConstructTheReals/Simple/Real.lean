@@ -2,15 +2,6 @@ import ConstructTheReals.Simple.Rational
 
 namespace ℚ
 
-
-
-
-instance: Zero ℚ :=
-  sorry
-
-instance: LE ℚ :=
-  sorry
-
 def dist (a b: ℚ): ℚ :=
   sorry
 

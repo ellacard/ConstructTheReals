@@ -85,9 +85,6 @@ instance [Ring α]: Neg α        := ⟨Ring.neg⟩
 instance [Ring α]: Sub α        := ⟨Ring.sub⟩
 instance [Semiring α]: One α        := ⟨Semiring.one⟩
 instance [Semiring α]: Mul α        := ⟨Semiring.mul⟩
-instance [Semiring α]: HPow α Nat α := ⟨flip Semiring.toMulMonoid.ngen⟩
-instance [Semiring α]: SMul Nat α   := ⟨Semiring.toAddMonoid.ngen⟩
-instance [Ring α]: SMul Int α   := ⟨Group.zgen⟩
 
 -- Unpacking axioms with notation.
 
@@ -138,23 +135,6 @@ theorem neg_zero [Ring α]: -(0: α) = 0 := by
 
 theorem mul_comm [CommSemiring α] (a b: α): a * b = b * a := by
   apply CommSemiring.mul_comm
-
--- nmul and npow
-
-theorem nmul_zero [Semiring α] (a: α): 0 • a = 0 := by
-  rfl
-
-theorem nmul_succ [Semiring α] (a: α) (n: Nat): (n + 1) • a = (n • a) + a := by
-  rfl
-
-theorem zmul_zero [Ring α] (a: α): (0: Int) • a = 0 := by
-  rfl
-
-theorem npow_zero [Semiring α] (a: α): a^0 = 1 := by
-  rfl
-
-theorem npow_one [Semiring α] (a: α): a^1 = a := by
-  apply ngen_one
 
 -- Basic theorems
 
