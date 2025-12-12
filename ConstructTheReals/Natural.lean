@@ -264,6 +264,12 @@ theorem le_add {a b c: ℕ} (h: a ≤ b): a + c ≤ b + c := by
   exists t
   rw [←ht, add_assoc, add_comm c t, ←add_assoc]
 
+theorem le_add_left (a: ℕ) {b c: ℕ} (h: a + b ≤ a + c): b ≤ c := by
+  sorry
+
+theorem le_add_right {a b: ℕ} (c: ℕ) (h: a + c ≤ b + c): a ≤ b := by
+  sorry
+
 instance: DecidableEq ℕ := sorry
 instance: ∀ a b: ℕ, Decidable (a ≤ b) := sorry
 
@@ -300,10 +306,6 @@ theorem max_lub (a b c: ℕ) (h₁: a ≤ b) (h₂: b ≤ c): max a b ≤ c := b
 
 
 
--- More theorems about ℕ
-
-theorem one_nonzero: (1: ℕ) ≠ 0 := by
-  intro
-  contradiction
+-- More theorems and definitions.
 
 instance: Max ℕ := ⟨sorry⟩

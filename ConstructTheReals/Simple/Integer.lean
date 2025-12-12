@@ -134,18 +134,81 @@ def mul (a b: ℤ): ℤ :=
 
 instance: Mul ℤ := ⟨mul⟩
 
+-- Multiplication theorems.
+
+theorem mul_assoc {a b c: ℤ}: (a * b) * c = a * (b * c) := by
+  sorry
+
+theorem mul_comm {a b: ℤ}: a * b = b * a := by
+  sorry
+
+theorem mul_cancel_left {a b c: ℤ} (h: a ≠ 0): a * b = a * c → b = c := by
+  sorry
+
+theorem mul_cancel_right {a b c: ℤ} (h: c ≠ 0): a * c = b * c → a = b := by
+  sorry
+
 
 
 -- Define ≤.
 
 def le (a b: ℤ): Prop :=
-  sorry
+  Quotient.liftOn₂ a b (λ (a₁, a₂) (b₁, b₂) ↦ a₁ + b₂ ≤ b₁ + a₂)
+  ( by
+    intro (a₁, a₂) (b₁, b₂) (c₁, c₂) (d₁, d₂) hac hbd
+    change a₁ + c₂ = c₁ + a₂ at hac
+    change b₁ + d₂ = d₁ + b₂ at hbd
+    simp
+    constructor
+    · intro h
+      apply ℕ.le_add_left a₂
+      apply ℕ.le_add_right b₁
+      have h': (a₁ + b₂) + (d₁ + c₂) ≤ (a₂ + b₁) + (d₁ + c₂) := by
+        apply ℕ.le_add
+        rw [ℕ.add_comm a₂ b₁]
+        exact h
+      calc
+        a₂ + (c₁ + d₂) + b₁
+        _ = (a₂ + c₁) + (d₂ + b₁) := by simp [ℕ.add_assoc]
+        _ = (c₁ + a₂) + (b₁ + d₂) := by simp [ℕ.add_comm]
+        _ = (a₁ + c₂) + (d₁ + b₂) := by rw [hac, hbd]
+        _ = a₁ + ((c₂ + d₁) + b₂) := by simp [ℕ.add_assoc]
+        _ = a₁ + (b₂ + (d₁ + c₂)) := by simp [ℕ.add_comm]
+        _ = (a₁ + b₂) + (d₁ + c₂) := by simp [ℕ.add_assoc]
+        _ ≤ (a₂ + b₁) + (d₁ + c₂) := by exact h'
+        _ = a₂ + (b₁ + (d₁ + c₂)) := by simp [ℕ.add_assoc]
+        _ = a₂ + ((d₁ + c₂) + b₁) := by simp [ℕ.add_comm]
+        _ = a₂ + (d₁ + c₂) + b₁   := by simp [ℕ.add_assoc]
+    · intro h
+      apply ℕ.le_add_left c₂
+      apply ℕ.le_add_right d₁
+      have h': (c₁ + d₂) + (a₂ + b₁) ≤ (d₁ + c₂) + (a₂ + b₁) := by
+        apply ℕ.le_add
+        exact h
+      calc
+        c₂ + (a₁ + b₂) + d₁
+        _ = (c₂ + a₁) + (b₂ + d₁)   := by simp [ℕ.add_assoc]
+        _ = (a₁ + c₂) + (d₁ + b₂)   := by simp [ℕ.add_comm]
+        _ = (c₁ + a₂) + (b₁ + d₂)   := by simp [hac, hbd]
+        _ = c₁ + ((a₂ + b₁) + d₂)   := by simp [ℕ.add_assoc]
+        _ = c₁ + (d₂ + (a₂ + b₁))   := by simp [ℕ.add_comm]
+        _ = (c₁ + d₂) + (a₂ + b₁)   := by simp [ℕ.add_assoc]
+        _ ≤ (d₁ + c₂) + (a₂ + b₁)   := by exact h'
+        _ = (d₁ + (c₂ + (a₂ + b₁))) := by simp [ℕ.add_assoc]
+        _ = ((c₂ + (b₁ + a₂)) + d₁) := by simp [ℕ.add_comm]
+        _ = c₂ + (b₁ + a₂) + d₁     := by simp [ℕ.add_assoc]
+  )
 
-instance: LE ℤ := ⟨ℤ.le⟩
+instance: LE ℤ := ⟨le⟩
 
 
 
--- More theorems about ℤ
+-- More theorems and definitions.
 
 theorem one_nonzero: (1: ℤ) ≠ 0 := by
+  intro h
+  have := Quotient.exact h
+  contradiction
+
+theorem no_zero_divisors {a b: ℤ} (ha: a ≠ 0) (hb: b ≠ 0): a * b ≠ 0 := by
   sorry

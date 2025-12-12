@@ -34,10 +34,21 @@ def ℚ: Type := @Quotient (ℤ × Nonzero ℤ) {
     refl := by intro; rfl
     symm := Eq.symm
     trans := by
-      intro (a₁, a₂) (b₁, b₂) (c₁, c₂)
+      intro (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) (c₁, ⟨c₂, hc₂⟩)
       simp
       intro h₁ h₂
-      sorry
+      apply ℤ.mul_cancel_left hb₂
+      calc
+        b₂ * (a₁ * c₂)
+        _ = (b₂ * a₁) * c₂ := by simp [ℤ.mul_assoc]
+        _ = (a₁ * b₂) * c₂ := by simp [ℤ.mul_comm]
+        _ = (b₁ * a₂) * c₂ := by rw [h₁]
+        _ = c₂ * (b₁ * a₂) := by simp [ℤ.mul_comm]
+        _ = (c₂ * b₁) * a₂ := by simp [ℤ.mul_assoc]
+        _ = (b₁ * c₂) * a₂ := by simp [ℤ.mul_comm]
+        _ = (c₁ * b₂) * a₂ := by rw [h₂]
+        _ = (b₂ * c₁) * a₂ := by simp [ℤ.mul_comm]
+        _ = b₂ * (c₁ * a₂) := by simp [ℤ.mul_assoc]
   }
 }
 
@@ -64,7 +75,7 @@ instance: One ℚ := ⟨one⟩
 -- Define addition.
 
 def add (a b: ℚ): ℚ :=
-  Quotient.liftOn₂ a b (λ (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) ↦ Quotient.mk _ (a₁*b₂ + b₁*a₂, ⟨a₂*b₂, sorry⟩)) -- this sorry says that ℤ is integral domain, x ≠ 0 ∧ y ≠ 0 → x*y ≠ 0
+  Quotient.liftOn₂ a b (λ (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) ↦ Quotient.mk _ (a₁ * b₂ + b₁ * a₂, ⟨a₂ * b₂, ℤ.no_zero_divisors ha₂ hb₂⟩))
   ( by
     intro (a₁, a₂) (b₁, b₂) (c₁, c₂) (d₁, d₂) h h'
     apply Quotient.sound
@@ -96,7 +107,7 @@ instance: Neg ℚ := ⟨neg⟩
 -- Define multiplication.
 
 def mul (a b: ℚ): ℚ :=
-  Quotient.liftOn₂ a b (λ (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) ↦ Quotient.mk _ (a₁ * b₁, ⟨a₂ * b₂, sorry⟩))
+  Quotient.liftOn₂ a b (λ (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) ↦ Quotient.mk _ (a₁ * b₁, ⟨a₂ * b₂, ℤ.no_zero_divisors ha₂ hb₂⟩))
   ( by
     intro (a₁, a₂) (b₁, b₂) (c₁, c₂) (d₁, d₂) h h'
     apply Quotient.sound
@@ -147,7 +158,7 @@ instance: LE ℚ := ⟨le⟩
 
 
 
--- More theorems about ℚ
+-- More theorems and definitions.
 
 instance {a b: ℚ}: Decidable (a ≤ b) := sorry
 
