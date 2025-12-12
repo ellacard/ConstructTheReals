@@ -1,5 +1,23 @@
 import ConstructTheReals.Natural
 
+/-
+
+Define the integers ℤ as the quotient on ℕ ⨯ ℕ by the relation
+  (a₁, a₂) ~ (b₁, b₂) ↔ a₁ + b₂ = b₁ + a₂
+thus adjoining additive inverses for every element of ℕ.
+
+Then, lift the operations + and * and the order ≤ to ℤ.
+
+Properties of ℤ:
+- (ℤ, +) is a cancellative commutative group
+- (ℤ, *) is a commutative monoid
+- (ℤ, +, *) is an integral domain (a nonzero commutative ring with no zero divisors)
+- (ℤ, ≤) is a lattice
+
+-/
+
+-- Define the quotient on ℕ ⨯ ℕ.
+
 def ℤ: Type := @Quotient (ℕ × ℕ) {
   r := λ (a₁, a₂) (b₁, b₂) ↦ a₁ + b₂ = b₁ + a₂
   iseqv := {
@@ -80,7 +98,12 @@ instance: Mul ℤ := ⟨mul⟩
 
 theorem add_zero_left (a: ℤ): 0 + a = a := by
   refine Quotient.inductionOn a ?_
-  intro
+  intro x
   apply Quotient.sound
   simp [ℕ.add_zero_left]
   rfl
+
+def ℤ.le (a b: ℤ): Prop :=
+  sorry
+
+instance: LE ℤ := ⟨ℤ.le⟩

@@ -1,9 +1,19 @@
 import ConstructTheReals.Simple.Rational
 
+/-
+
+Define the real numbers ℝ as the quotient on the set of cauchy sequences ℕ → ℚ by the relation
+  (a_n) ~ (b_n) ↔ |a_n - b_n| converges to 0
+thus completing ℚ.
+
+Properties of ℝ:
+
+-/
+
 namespace ℚ
 
 def dist (a b: ℚ): ℚ :=
-  sorry
+  abs (a - b)
 
 def converges_to (a: ℕ → ℚ) (L: ℚ): Prop :=
   ∀ r > 0, ∃ n, ∀ m ≥ n, dist (a m) L < r
