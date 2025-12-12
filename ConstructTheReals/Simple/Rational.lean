@@ -19,14 +19,16 @@ Properties of ℚ:
 def Set (α: Type u): Type u :=
   α → Prop
 
-instance (α: Type u): CoeSort (Set α) (Type u) := {
-  coe := Subtype
-}
+instance (α: Type u): CoeSort (Set α) (Type u) := ⟨Subtype⟩
 
-def ℤ.nonzero: Set ℤ :=
-  λ a ↦ a ≠ 0
+def Nonzero (X: Type u) [Zero X]: Set X :=
+  λ x ↦ x ≠ 0
 
-def ℚ: Type := @Quotient (ℤ × ℤ.nonzero) {
+
+
+-- Define the quotient on ℤ × ℤ \ {0}.
+
+def ℚ: Type := @Quotient (ℤ × Nonzero ℤ) {
   r := λ (a₁, a₂) (b₁, b₂) ↦ a₁ * b₂ = b₁ * a₂
   iseqv := {
     refl := by intro; rfl
@@ -39,13 +41,11 @@ def ℚ: Type := @Quotient (ℤ × ℤ.nonzero) {
   }
 }
 
-theorem ℕ.one_nonzero: (1: ℕ) ≠ 0 := by
-  sorry
 
-theorem ℤ.one_nonzero: (1: ℤ) ≠ 0 := by
-  sorry
 
-instance: One ℤ.nonzero := ⟨1, ℤ.one_nonzero⟩
+-- Define 0 and 1.
+
+instance: One (Nonzero ℤ) := ⟨1, ℤ.one_nonzero⟩
 
 namespace ℚ
 
@@ -59,7 +59,10 @@ def one: ℚ :=
 
 instance: One ℚ := ⟨one⟩
 
--- a/b + c/d = (ad + bc)/(bd)
+
+
+-- Define addition.
+
 def add (a b: ℚ): ℚ :=
   Quotient.liftOn₂ a b (λ (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) ↦ Quotient.mk _ (a₁*b₂ + b₁*a₂, ⟨a₂*b₂, sorry⟩)) -- this sorry says that ℤ is integral domain, x ≠ 0 ∧ y ≠ 0 → x*y ≠ 0
   ( by
@@ -72,7 +75,10 @@ def add (a b: ℚ): ℚ :=
 
 instance: Add ℚ := ⟨add⟩
 
--- -(a/b) = (-a)/b
+
+
+-- Define subtraction.
+
 def neg (a: ℚ): ℚ :=
   Quotient.liftOn a (λ (a₁, a₂) ↦ Quotient.mk _ (-a₁, a₂))
   ( by
@@ -85,6 +91,10 @@ def neg (a: ℚ): ℚ :=
 
 instance: Neg ℚ := ⟨neg⟩
 
+
+
+-- Define multiplication.
+
 def mul (a b: ℚ): ℚ :=
   Quotient.liftOn₂ a b (λ (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) ↦ Quotient.mk _ (a₁ * b₁, ⟨a₂ * b₂, sorry⟩))
   ( by
@@ -96,6 +106,10 @@ def mul (a b: ℚ): ℚ :=
   )
 
 instance: Mul ℚ := ⟨mul⟩
+
+
+
+-- Define division.
 
 def inv {a: ℚ} (ha: a ≠ 0): ℚ :=
   Quotient.liftOn a (λ (a₁, ⟨a₂, ha₂⟩) ↦ Quotient.mk _ (a₂, ⟨a₁, sorry⟩))
@@ -110,16 +124,17 @@ def inv {a: ℚ} (ha: a ≠ 0): ℚ :=
 theorem inv_nonzero {a: ℚ} (ha: a ≠ 0): (inv ha) ≠ 0 := by
   sorry
 
-def Nonzero (X: Type u) [Zero X]: Set X :=
-  λ x ↦ x ≠ 0
-
 instance: Inv (Nonzero ℚ) := {
   inv := λ a ↦ ⟨inv a.property, inv_nonzero a.property⟩
 }
 
--- a/b ≤ c/d if ... abd^2 ≤ cb^2d
--- todo; implement a Pow instance.
-def ℚ.le (a b: ℚ): Prop :=
+instance: Div ℚ := ⟨sorry⟩
+
+
+
+-- Define ≤.
+
+def le (a b: ℚ): Prop :=
   Quotient.liftOn₂ a b (λ (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) ↦ a₁ * a₂ * b₂ * b₂ ≤ b₁ * b₂ * a₂ * a₂)
   ( by
     intro (a₁, a₂) (b₁, b₂) (c₁, c₂) (d₁, d₂) h h'
@@ -128,9 +143,13 @@ def ℚ.le (a b: ℚ): Prop :=
     sorry
   )
 
-instance: LE ℚ := ⟨ℚ.le⟩
+instance: LE ℚ := ⟨le⟩
+
+
+
+-- More theorems about ℚ
 
 instance {a b: ℚ}: Decidable (a ≤ b) := sorry
 
-def ℚ.abs (a: ℚ): ℚ :=
+def abs (a: ℚ): ℚ :=
   if 0 ≤ a then a else -a

@@ -42,6 +42,10 @@ def ℤ: Type := @Quotient (ℕ × ℕ) {
 
 namespace ℤ
 
+
+
+-- Define 0 and 1.
+
 def zero: ℤ :=
   Quotient.mk _ (0, 0)
 
@@ -52,6 +56,10 @@ def one: ℤ :=
 
 instance: One ℤ := ⟨one⟩
 
+
+
+-- Define addition.
+
 def add (a b: ℤ): ℤ :=
   Quotient.liftOn₂ a b (λ (a₁, a₂) (b₁, b₂) ↦ Quotient.mk _ (a₁ + b₁, a₂ + b₂))
   ( by
@@ -59,12 +67,36 @@ def add (a b: ℤ): ℤ :=
     apply Quotient.sound
     calc
       (a₁ + b₁) + (c₂ + d₂)
-      _ = (a₁ + c₂) + (b₁ + d₂) := by sorry
+      _ = a₁ + (b₁ + c₂) + d₂   := by simp [ℕ.add_assoc]
+      _ = a₁ + (c₂ + b₁) + d₂   := by simp [ℕ.add_comm]
+      _ = (a₁ + c₂) + (b₁ + d₂) := by simp [ℕ.add_assoc]
       _ = (c₁ + a₂) + (d₁ + b₂) := by rw [h, h']
-      _ = (c₁ + d₁) + (a₂ + b₂) := by sorry
+      _ = c₁ + (a₂ + d₁) + b₂   := by simp [ℕ.add_assoc]
+      _ = c₁ + (d₁ + a₂) + b₂   := by simp [ℕ.add_comm]
+      _ = (c₁ + d₁) + (a₂ + b₂) := by simp [ℕ.add_assoc]
   )
 
 instance: Add ℤ := ⟨add⟩
+
+-- Addition theorems.
+
+theorem add_zero_left (a: ℤ): 0 + a = a := by
+  refine Quotient.inductionOn a ?_
+  intro _
+  apply Quotient.sound
+  simp [ℕ.add_zero_left]
+  rfl
+
+theorem add_zero_right (a: ℤ): a + 0 = a := by
+  refine Quotient.inductionOn a ?_
+  intro _
+  apply Quotient.sound
+  simp [ℕ.add_zero_right]
+  rfl
+
+
+
+-- Define subtraction.
 
 def neg (a: ℤ): ℤ :=
   Quotient.liftOn a (λ (a₁, a₂) ↦ Quotient.mk _ (a₂, a₁))
@@ -84,11 +116,17 @@ instance {X: Type u} [Add X] [Neg X]: Sub X := {
   sub := λ x y ↦ x + -y
 }
 
+
+
+-- Define multiplication.
+
 def mul (a b: ℤ): ℤ :=
   Quotient.liftOn₂ a b (λ (a₁, a₂) (b₁, b₂) ↦ Quotient.mk _ (a₁ * b₁ + a₂ * b₂, a₁ * b₂ + a₂ * b₁))
   ( by
     intro (a₁, a₂) (b₁, b₂) (c₁, c₂) (d₁, d₂) h h'
     apply Quotient.sound
+    change a₁ + c₂ = c₁ + a₂ at h
+    change b₁ + d₂ = d₁ + b₂ at h'
     calc
       (a₁ * b₁ + a₂ * b₂) + (c₁ * d₂ + c₂ * d₁)
       _ = (c₁ * d₁ + c₂ * d₂) + (a₁ * b₂ + a₂ * b₁) := by sorry
@@ -96,14 +134,18 @@ def mul (a b: ℤ): ℤ :=
 
 instance: Mul ℤ := ⟨mul⟩
 
-theorem add_zero_left (a: ℤ): 0 + a = a := by
-  refine Quotient.inductionOn a ?_
-  intro x
-  apply Quotient.sound
-  simp [ℕ.add_zero_left]
-  rfl
 
-def ℤ.le (a b: ℤ): Prop :=
+
+-- Define ≤.
+
+def le (a b: ℤ): Prop :=
   sorry
 
 instance: LE ℤ := ⟨ℤ.le⟩
+
+
+
+-- More theorems about ℤ
+
+theorem one_nonzero: (1: ℤ) ≠ 0 := by
+  sorry

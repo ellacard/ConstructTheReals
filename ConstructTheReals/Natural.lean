@@ -2,10 +2,9 @@
 
 Define the natural numbers ℕ as an inductive type.
 
-Properties:
+Properties of ℕ:
 - (ℕ, +) is a cancellative commutative monoid
-- (ℕ, *) is a commutative monoid
-- (ℕ, +, *) is a semiring
+- (ℕ, +, *) is a commutative semiring
 - (ℕ, ≤) is a lattice
 
 -/
@@ -43,7 +42,7 @@ def add (a b: ℕ): ℕ :=
 
 instance: Add ℕ := ⟨add⟩
 
--- Show (ℕ, +) is a cancellative commutative monoid.
+-- Addition theorems.
 
 theorem next_eq_iff {a b: ℕ}: a.next = b.next ↔ a = b := by
   exact Eq.to_iff (next.injEq a b)
@@ -121,7 +120,7 @@ def mul (a b: ℕ): ℕ :=
 
 instance: Mul ℕ := ⟨mul⟩
 
--- Show (ℕ, *) is a commutative monoid.
+-- Multiplication theorems.
 
 theorem mul_one_right (a: ℕ): a * 1 = a := by
   induction a with
@@ -172,26 +171,6 @@ theorem mul_comm (a b: ℕ): a * b = b * a := by
   | zero => rw [zero_eq, mul_zero_left, mul_zero_right]
   | next p hp => rw [mul_next_left, mul_next_right, hp, add_comm]
 
-theorem mul_assoc (a b c: ℕ): a * b * c = a * (b * c) := by
-  induction c with
-  | zero =>
-    rw [zero_eq]
-    repeat rw [mul_zero_right]
-  | next p hp =>
-    repeat rw [mul_next_right]
-    rw [hp]
-    sorry
-
-theorem mul_cancel_right {a b c: ℕ} (h: a * c = b * c) (hc: c ≠ 0): a = b := by
-  sorry
-
-theorem mul_cancel_left {a b c: ℕ} (h: a * b = a * c) (ha: a ≠ 0): b = c := by
-  sorry
-
-
-
--- Show (ℕ, +, *) is a semiring.
-
 theorem distrib_right (a b c: ℕ): (a + b) * c = a * c + b * c := by
   induction c with
   | zero =>
@@ -200,19 +179,34 @@ theorem distrib_right (a b c: ℕ): (a + b) * c = a * c + b * c := by
     rw [add_zero_right]
   | next p hp =>
     repeat rw [mul_next_right]
-    rw [hp]
-    sorry
+    calc
+      a + b + (a + b) * p
+      _ = a + b + (a * p + b * p)   := by rw [hp]
+      _ = a + (b + (a * p + b * p)) := by rw [add_assoc]
+      _ = a + ((a * p + b * p) + b) := by simp [add_comm]
+      _ = a + a * p + (b * p + b)   := by simp [add_assoc]
+      _ = a + a * p + (b + b * p)   := by simp [add_comm]
 
 theorem distrib_left (a b c: ℕ): a * (b + c) = a * b + a * c := by
-  induction a with
+  rw [mul_comm, mul_comm a b, mul_comm a c]
+  exact distrib_right b c a
+
+theorem mul_assoc (a b c: ℕ): a * b * c = a * (b * c) := by
+  induction c with
   | zero =>
     rw [zero_eq]
-    repeat rw [mul_zero_left]
-    rw [add_zero_left]
+    repeat rw [mul_zero_right]
   | next p hp =>
-    repeat rw [mul_next_left]
+    repeat rw [mul_next_right]
     rw [hp]
-    sorry
+    rw [distrib_left a b (b * p)]
+
+theorem mul_cancel_right {a b c: ℕ} (h: a * c = b * c) (hc: c ≠ 0): a = b := by
+  sorry
+
+theorem mul_cancel_left {a b c: ℕ} (h: a * b = a * c) (ha: a ≠ 0): b = c := by
+  rw [mul_comm a b, mul_comm a c] at h
+  exact mul_cancel_right h ha
 
 
 
@@ -227,7 +221,7 @@ instance {X: Type u} [LE X]: LT X := {
   lt := λ x y ↦ x ≤ y ∧ ¬ y ≤ x
 }
 
--- Show (ℕ, ≤) is a lattice.
+-- Order theorems.
 
 theorem le_refl (a: ℕ): a ≤ a := by
   exists 0
@@ -274,7 +268,6 @@ instance: DecidableEq ℕ := sorry
 instance: ∀ a b: ℕ, Decidable (a ≤ b) := sorry
 
 theorem not_le_lt {a b: ℕ} (h: ¬a ≤ b): b < a := by
-
   sorry
 
 theorem not_le_le {a b: ℕ} (h: ¬a ≤ b): b ≤ a := by
@@ -302,5 +295,15 @@ theorem max_le_right (a b: ℕ): b ≤ max a b := by
   exact le_refl b
   exact not_le_le h
 
-theorem max_lub (a b c: ℕ) (h₁: a ≤ b) (h₂: b ≤ c): a ≤ c := by
+theorem max_lub (a b c: ℕ) (h₁: a ≤ b) (h₂: b ≤ c): max a b ≤ c := by
   sorry
+
+
+
+-- More theorems about ℕ
+
+theorem one_nonzero: (1: ℕ) ≠ 0 := by
+  intro
+  contradiction
+
+instance: Max ℕ := ⟨sorry⟩
