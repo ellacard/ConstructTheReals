@@ -1,7 +1,3 @@
-class ExistsUnique {X: Type u} (P: X → Prop): Prop where
-  exist: ∃ x, P x
-  unique: ∀ x y, P x → P y → x = y
-
 theorem contrapose {P Q: Prop}: (¬Q → ¬P) → (P → Q) := by
   intro h hP
   by_cases hQ: Q

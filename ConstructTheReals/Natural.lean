@@ -3,9 +3,9 @@
 Define the natural numbers ℕ as an inductive type.
 
 Properties of ℕ:
-- (ℕ, +) is a cancellative commutative monoid
+- (ℕ, +) is a commutative cancellative monoid
 - (ℕ, +, *) is a commutative semiring
-- (ℕ, ≤) is a lattice
+- <order>
 
 -/
 
@@ -41,6 +41,9 @@ def add (a b: ℕ): ℕ :=
   | next p => next (add a p)
 
 instance: Add ℕ := ⟨add⟩
+
+theorem next_eq {a: ℕ}: a.next = a + 1 := by
+  rfl
 
 -- Addition theorems.
 
@@ -210,7 +213,7 @@ theorem mul_cancel_left {a b c: ℕ} (h: a * b = a * c) (ha: a ≠ 0): b = c := 
 
 
 
--- Define an order ≤ on ℕ.
+-- Define ≤.
 
 def le (a b: ℕ): Prop :=
   ∃ d, a + d = b
@@ -218,7 +221,7 @@ def le (a b: ℕ): Prop :=
 instance: LE ℕ := ⟨le⟩
 
 instance {X: Type u} [LE X]: LT X := {
-  lt := λ x y ↦ x ≤ y ∧ ¬ y ≤ x
+  lt := λ x y ↦ x ≤ y ∧ x ≠ y
 }
 
 -- Order theorems.
@@ -252,9 +255,6 @@ theorem le_antisymm {a b: ℕ} (h₁: a ≤ b) (h₂: b ≤ a): a = b := by
   rw [←hd₂, ←hd₁, hd₁', hd₂']
   repeat rw [add_zero_right]
 
-theorem le_total (a b: ℕ): a ≤ b ∨ b ≤ a := by
-  sorry
-
 theorem le_bottom (a: ℕ): 0 ≤ a := by
   exists a
   exact add_zero_left a
@@ -265,25 +265,69 @@ theorem le_add {a b c: ℕ} (h: a ≤ b): a + c ≤ b + c := by
   rw [←ht, add_assoc, add_comm c t, ←add_assoc]
 
 theorem le_add_left (a: ℕ) {b c: ℕ} (h: a + b ≤ a + c): b ≤ c := by
-  sorry
+  have ⟨k, hk⟩ := h
+  rw [add_assoc a b k] at hk
+  have := add_cancel_left a hk
+  exists k
 
 theorem le_add_right {a b: ℕ} (c: ℕ) (h: a + c ≤ b + c): a ≤ b := by
-  sorry
+  rw [add_comm a c, add_comm b c] at h
+  exact le_add_left c h
 
-instance: DecidableEq ℕ := sorry
-instance: ∀ a b: ℕ, Decidable (a ≤ b) := sorry
+theorem le_total (a b: ℕ): a ≤ b ∨ b ≤ a := by
+  induction a with
+  | zero =>
+    apply Or.inl
+    exists b
+    rw [zero_eq, add_zero_left]
+  | next p hp =>
+    cases hp with
+    | inl h => sorry
+    | inr h => sorry
 
-theorem not_le_lt {a b: ℕ} (h: ¬a ≤ b): b < a := by
-  sorry
+theorem not_le {a b: ℕ} (h: ¬a ≤ b): ∀ k, ¬a + k = b := by
+  exact not_exists.mp h
 
 theorem not_le_le {a b: ℕ} (h: ¬a ≤ b): b ≤ a := by
-  exact (not_le_lt h).left
+  cases le_total a b with
+  | inl => contradiction
+  | inr h' => exact h'
+
+theorem not_le_lt {a b: ℕ} (h: ¬a ≤ b): b < a := by
+  have ⟨k, hk⟩ := not_le_le h
+  by_cases h₀: k = 0
+  · have := not_le h 0
+    rw [add_zero_right] at this
+    rw [h₀, add_zero_right] at hk
+    have: a = b := by exact Eq.symm hk
+    contradiction
+  · constructor
+    · exists k
+    · intro h'
+      rw [←add_zero_right b] at h'
+      have: b + k = b + 0 := by rw [hk, h']
+      have: k = 0 := by rw [add_cancel_left b this]
+      contradiction
+
+instance: DecidableEq ℕ := sorry
+
+instance: ∀ a b: ℕ, Decidable (a ≤ b) := sorry
+
+
+
+-- Define min and max.
 
 def min (a b: ℕ): ℕ :=
   if a ≤ b then a else b
 
+instance: Max ℕ := ⟨min⟩
+
 def max (a b: ℕ): ℕ :=
   if a ≤ b then b else a
+
+instance: Max ℕ := ⟨max⟩
+
+-- Min and max theorems.
 
 def min_symm (a b: ℕ): min a b = min b a := by
   by_cases h: a ≤ b <;> simp_all [min]
@@ -303,9 +347,3 @@ theorem max_le_right (a b: ℕ): b ≤ max a b := by
 
 theorem max_lub (a b c: ℕ) (h₁: a ≤ b) (h₂: b ≤ c): max a b ≤ c := by
   sorry
-
-
-
--- More theorems and definitions.
-
-instance: Max ℕ := ⟨sorry⟩
