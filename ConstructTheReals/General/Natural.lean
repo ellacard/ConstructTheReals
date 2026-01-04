@@ -4,13 +4,15 @@ import ConstructTheReals.General.Ring
 
 /-
 
-Define the semiring and lattice on ℕ.
+Properties of ℕ:
+- (ℕ, +, *) is a commutative semiring
+- (ℕ, ≤) is a lattice
 
 -/
 
 open ℕ
 
-instance NaturalSemiring: CommSemiring ℕ := {
+instance ℕ.CommSemiring: CommSemiring ℕ := {
   add := add
   zero := zero
   add_assoc := add_assoc
@@ -24,12 +26,12 @@ instance NaturalSemiring: CommSemiring ℕ := {
   mul_comm := mul_comm
 }
 
-instance NaturalLattice: Lattice ℕ := {
+instance ℕ.Lattice: Lattice ℕ := {
   reflexive := le_refl
   transitive := @le_trans
   antisymmetric := @le_antisymm
-  min := min
-  max := max
+  min := ℕ.min
+  max := ℕ.max
   max_le_left := max_le_left
   max_le_right := max_le_right
   max_lub := sorry

@@ -1,39 +1,34 @@
-import ConstructTheReals.General.Field
+import ConstructTheReals.General.FieldOfFractions
 import ConstructTheReals.General.Integer
-import ConstructTheReals.General.Localization
 import ConstructTheReals.General.MetricSpace
 
 /-
 
-Construction of the rationals.
+Define the rationals as the field of fractions of the integers.
 
-Need to show
-- poset/lattice
+Properties of ℚ:
+- (ℚ, +, *) is a field
+- (ℚ, ≤) is a lattice
+- Other order properties?
 
 -/
 
--- ℤ is an integral domain.
-
-instance: IntegralDomain ℤ := {
-  no_zero_divisors := sorry
-  nontrivial := sorry
-}
-
--- Define ℚ as the field of fractions of ℤ, which is the localization of ℤ by ℤ \ {0}.
-
 def Rational: Type :=
-  sorry
+  ℤ.IntegralDomain.field_of_fractions_type
 
 abbrev ℚ: Type :=
   Rational
 
-instance: Field ℚ :=
+instance ℚ.Field: Field ℚ :=
+  ℤ.IntegralDomain.field_of_fractions
+
+instance ℚ.Lattice: Lattice ℚ :=
   sorry
 
-instance: Lattice ℚ :=
-  sorry
 
--- Need to show we have a metric on Q.
+
+-- Define a metric on Q.
+
 def NNRational: Type :=
   Subtype (λ x: ℚ ↦ 0 ≤ x)
 

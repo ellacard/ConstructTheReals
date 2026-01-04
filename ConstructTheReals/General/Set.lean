@@ -1,4 +1,4 @@
-import ConstructTheReals.General.Logic
+import ConstructTheReals.Logic
 import ConstructTheReals.General.Operation
 
 variable {α: Type u} {β: Type v} {γ: Type w}
@@ -13,7 +13,7 @@ instance (α: Type u): CoeSort (Set α) (Type u) := {
 def Set.empty {α: Type u}: Set α :=
   λ _ ↦ False
 
-def Set.full {α: Type u}: Set α :=
+def Set.full (α: Type u): Set α :=
   λ _ ↦ True
 
 def Set.singleton {α: Type u} (a: α): Set α :=
@@ -34,7 +34,7 @@ instance: EmptyCollection (Set α) := {
 theorem Set.empty_subset (A: Set α): ∅ ⊆ A := by
   exact λ _ ↦ False.elim
 
-theorem Set.subset_full (A: Set α): A ⊆ Set.full := by
+theorem Set.subset_full (A: Set α): A ⊆ Set.full α := by
   exact λ _ _ ↦ trivial
 
 def Set.inter (A B: Set α): Set α :=
@@ -93,7 +93,7 @@ theorem Set.not_nonempty_iff {S: Set α}: ¬S.nonempty ↔ S = ∅ := by
   simp
   exact Iff.symm nonempty_iff
 
-theorem Set.compl_empty_iff {S: Set α}: S.compl = ∅ ↔ S = Set.full := by
+theorem Set.compl_empty_iff {S: Set α}: S.compl = ∅ ↔ S = Set.full α := by
   constructor
   · intro h
     funext x
@@ -115,7 +115,7 @@ theorem Set.compl_empty_iff {S: Set α}: S.compl = ∅ ↔ S = Set.full := by
       by_cases hx: x ∈ S
       · contradiction
       · rw [h] at hx
-        have: x ∈ full := by trivial
+        have: x ∈ Set.full α := by trivial
         contradiction
     · intro h'
       contradiction
@@ -160,7 +160,7 @@ theorem Set.union_comm: Commutative (@Set.union α) := by
   simp [Set.union]
   exact Or.comm
 
-theorem Set.inter_identity: Identity Set.inter (@Set.full α) := by
+theorem Set.inter_identity: Identity Set.inter (Set.full α) := by
   constructor
   · intro
     funext

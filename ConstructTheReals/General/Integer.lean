@@ -1,50 +1,30 @@
-import ConstructTheReals.General.Localization
+import ConstructTheReals.General.GroupOfDifferences
 import ConstructTheReals.General.Natural
 
 /-
 
-Construction of the integers.
+Define the integers as the group of differences of the natural numbers.
 
-Want to show they are
-- commutative ring
-- possibly cancellative wrt. addition
-- partial order / total order / lattice
+Properties of ℤ:
+- (ℤ, +, *) is an integral domain (a nonzero commutative ring with no zero divisors)
+- (ℤ, ≤) is a lattice
+- Other order properties?
 
 -/
 
--- We can construct the type of integers via the Grothendieck construction.
--- This gives us an additive commutative monoid.
-
 def Integer: Type :=
-  @Localization.quotient.full ℕ CommSemiring.toAddMonoid
-
--- def NonnegRational: Type :=
---   @Localization.quotient.full ℕ CommSemiring.toMulMonoid
+  ℕ.CommSemiring.group_of_differences_type
 
 abbrev ℤ: Type :=
   Integer
 
-instance: CommGroup ℤ :=
-  @Localization.Localization.group_of_differences ℕ CommSemiring.toAddMonoid
+instance ℤ.CommRing: CommRing ℤ :=
+  ℕ.CommSemiring.group_of_differences
 
-instance: CommRing ℤ :=
-  sorry
-
-example: Localization.order_compatible NaturalSemiring.toAddMonoid NaturalLattice.toPartialOrder := by
-  intro a b c h₁
-  exact ℕ.le_add h₁
-
-instance: Lattice ℤ := {
-  le := sorry
-  reflexive := sorry
-  transitive := sorry
-  antisymmetric := sorry
-  min := sorry
-  max := sorry
-  max_le_left := sorry
-  max_le_right := sorry
-  max_lub := sorry
-  min_le_left := sorry
-  min_le_right := sorry
-  min_glb := sorry
+instance ℤ.IntegralDomain: IntegralDomain ℤ := {
+  no_zero_divisors := sorry
+  nontrivial := sorry
 }
+
+instance ℤ.Lattice: Lattice ℤ :=
+ sorry

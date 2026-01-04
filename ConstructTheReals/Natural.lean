@@ -3,7 +3,6 @@
 Define the natural numbers ℕ as an inductive type.
 
 Properties of ℕ:
-- (ℕ, +) is a commutative cancellative monoid
 - (ℕ, +, *) is a commutative semiring
 - <order>
 

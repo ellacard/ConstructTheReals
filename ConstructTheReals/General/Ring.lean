@@ -4,12 +4,12 @@ variable {α: Type u}
 
 /-
 
-A ring is a set with
+A ring is a set along with
 - a commutative group structure denoted `+`
 - a monoid structure denoted `*`
 - `*` is distributive over `+`
 
-A commutative ring has commutative multiplication.
+A commutative ring is a ring where multiplication commutes.
 
 -/
 
@@ -229,7 +229,7 @@ theorem Semiring.ideal.toSubmonoid {R: Semiring α} {S: Set α} (h: R.ideal S): 
   op_closed := h.op_closed
 }
 
-theorem Semiring.full_ideal {R: Semiring α}: R.ideal Set.full := {
+theorem Semiring.full_ideal {R: Semiring α}: R.ideal (Set.full α) := {
   unit_mem := trivial
   op_closed := by intros; trivial
   absorb_prod_left := by intros; trivial
