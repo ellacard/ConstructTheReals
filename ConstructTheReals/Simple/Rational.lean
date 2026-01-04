@@ -9,10 +9,10 @@ thus adjoining multiplicative inverses for every nonzero element of ℤ.
 Then, lift the operations + and * and the order ≤ to ℚ.
 
 Properties of ℚ:
-- (ℚ, +) is a cancellative commutative group
+- (ℚ, +) is a commutative group
 - (ℚ, *) is a commutative monoid
 - (ℚ, +, *) is a field
-- (ℚ, ≤) is a lattice
+- <order>
 
 -/
 
@@ -28,14 +28,17 @@ def Nonzero (X: Type u) [Zero X]: Set X :=
 
 -- Define the quotient on ℤ × ℤ \ {0}.
 
+def ℚ.relation: (ℤ × Nonzero ℤ) → (ℤ × Nonzero ℤ) → Prop :=
+  λ (a₁, a₂) (b₁, b₂) ↦ a₁ * b₂ = b₁ * a₂
+
 def ℚ: Type := @Quotient (ℤ × Nonzero ℤ) {
-  r := λ (a₁, a₂) (b₁, b₂) ↦ a₁ * b₂ = b₁ * a₂
+  r := ℚ.relation
   iseqv := {
     refl := by intro; rfl
     symm := Eq.symm
     trans := by
       intro (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) (c₁, ⟨c₂, hc₂⟩)
-      simp
+      simp [ℚ.relation]
       intro h₁ h₂
       apply ℤ.mul_cancel_left hb₂
       calc
@@ -52,13 +55,23 @@ def ℚ: Type := @Quotient (ℤ × Nonzero ℤ) {
   }
 }
 
+namespace ℚ
+
+instance: HasEquiv (ℤ × Nonzero ℤ) := ⟨ℚ.relation⟩
+
+theorem equiv_iff (a₁ b₁: ℤ) (a₂ b₂: Nonzero ℤ): (a₁, a₂) ≈ (b₁, b₂) ↔ a₁ * b₂ = b₁ * a₂ := by
+  rfl
 
 
--- Define 0 and 1.
+
+-- Embedding of ℤ in ℚ.
 
 instance: One (Nonzero ℤ) := ⟨1, ℤ.one_nonzero⟩
 
-namespace ℚ
+instance: Coe ℤ ℚ := ⟨λ z ↦ Quotient.mk _ (z, 1)⟩
+
+
+-- Define 0 and 1.
 
 def zero: ℚ :=
   Quotient.mk _ (0, 1)
@@ -75,10 +88,11 @@ instance: One ℚ := ⟨one⟩
 -- Define addition.
 
 def add (a b: ℚ): ℚ :=
-  Quotient.liftOn₂ a b (λ (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) ↦ Quotient.mk _ (a₁ * b₂ + b₁ * a₂, ⟨a₂ * b₂, ℤ.no_zero_divisors ha₂ hb₂⟩))
+  Quotient.liftOn₂ a b (λ (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) ↦ Quotient.mk _ (a₁ * b₂ + b₁ * a₂, ⟨a₂ * b₂, ℤ.no_zero_divisors ⟨ha₂, hb₂⟩⟩))
   ( by
     intro (a₁, a₂) (b₁, b₂) (c₁, c₂) (d₁, d₂) h h'
     apply Quotient.sound
+    simp [equiv_iff] at h h' ⊢
     calc
       (a₁ * b₂ + b₁ * a₂) * (c₂ * d₂)
       _ = (c₁ * d₂ + d₁ * c₂) * (a₂ * b₂) := by sorry
@@ -95,6 +109,7 @@ def neg (a: ℚ): ℚ :=
   ( by
     intro (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) h
     apply Quotient.sound
+    simp [equiv_iff] at h ⊢
     calc
       (-a₁) * b₂
       _ = (-b₁) * a₂ := by sorry
@@ -107,10 +122,11 @@ instance: Neg ℚ := ⟨neg⟩
 -- Define multiplication.
 
 def mul (a b: ℚ): ℚ :=
-  Quotient.liftOn₂ a b (λ (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) ↦ Quotient.mk _ (a₁ * b₁, ⟨a₂ * b₂, ℤ.no_zero_divisors ha₂ hb₂⟩))
+  Quotient.liftOn₂ a b (λ (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) ↦ Quotient.mk _ (a₁ * b₁, ⟨a₂ * b₂, ℤ.no_zero_divisors ⟨ha₂, hb₂⟩⟩))
   ( by
     intro (a₁, a₂) (b₁, b₂) (c₁, c₂) (d₁, d₂) h h'
     apply Quotient.sound
+    simp [equiv_iff] at h h' ⊢
     calc
       (a₁ * b₁) * (c₂ * d₂)
       _ = (c₁ * d₁) * (a₂ * b₂) := sorry
@@ -127,6 +143,7 @@ def inv {a: ℚ} (ha: a ≠ 0): ℚ :=
   ( by
     intro (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) h
     apply Quotient.sound
+    simp [equiv_iff] at h ⊢
     calc
       a₂ * b₁
       _ = b₂ * a₁ := by sorry
@@ -149,8 +166,7 @@ def le (a b: ℚ): Prop :=
   Quotient.liftOn₂ a b (λ (a₁, ⟨a₂, ha₂⟩) (b₁, ⟨b₂, hb₂⟩) ↦ a₁ * a₂ * b₂ * b₂ ≤ b₁ * b₂ * a₂ * a₂)
   ( by
     intro (a₁, a₂) (b₁, b₂) (c₁, c₂) (d₁, d₂) h h'
-    --apply Quotient.sound
-    simp
+    simp [equiv_iff] at h h' ⊢
     sorry
   )
 
@@ -158,7 +174,123 @@ instance: LE ℚ := ⟨le⟩
 
 
 
+-- Addition theorems.
+
+theorem add_comm (a b: ℚ): a + b = b + a := by
+  sorry
+
+theorem add_assoc (a b c: ℚ): a + b + c = a + (b + c) := by
+  sorry
+
+theorem add_zero_left (a: ℚ): 0 + a = a := by
+  sorry
+
+theorem add_zero_right (a: ℚ): a + 0 = a := by
+  sorry
+
+theorem add_left_neg (a: ℚ): -a + a = 0 := by
+  sorry
+
+theorem add_right_neg (a: ℚ): a + -a = 0 := by
+  sorry
+
+
+
+-- Multiplication theorems.
+
+theorem mul_comm (a b: ℚ): a * b = b * a := by
+  sorry
+
+theorem mul_assoc (a b c: ℚ): a * b * c = a * (b * c) := by
+  sorry
+
+theorem mul_one_left (a: ℚ): 1 * a = a := by
+  sorry
+
+theorem mul_one_right (a: ℚ): a * 1 = a := by
+  sorry
+
+theorem mul_zero_left (a: ℚ): 0 * a = 0 := by
+  sorry
+
+theorem mul_zero_right (a: ℚ): a * 0 = 0 := by
+  sorry
+
+theorem distrib_left (a b c: ℚ): a * (b + c) = a * b + a * c := by
+  sorry
+
+theorem distrib_right (a b c: ℚ): (a + b) * c = a * c + b * c := by
+  sorry
+
+
+
+-- Subtraction theorems.
+
+theorem neg_neg (a: ℚ): -(-a) = a := by
+  sorry
+
+theorem neg_zero: (-0: ℚ) = 0 := by
+  sorry
+
+theorem neg_add (a b: ℚ): -(a + b) = -a + -b := by
+  sorry
+
+theorem neg_mul_left (a b: ℚ): (-a) * b = -(a * b) := by
+  sorry
+
+theorem neg_mul_right (a b: ℚ): a * (-b) = -(a * b) := by
+  sorry
+
+
+
+-- Inverse theorems.
+
+theorem mul_inv_cancel {a: ℚ} (ha: a ≠ 0): a * (inv ha) = 1 := by
+  sorry
+
+theorem inv_mul_cancel {a: ℚ} (ha: a ≠ 0): (inv ha) * a = 1 := by
+  sorry
+
+theorem inv_inv {a: ℚ} (ha: a ≠ 0) (ha': inv ha ≠ 0): inv ha' = a := by
+  sorry
+
+
+
+-- Order theorems.
+
+theorem le_refl (a: ℚ): a ≤ a := by
+  sorry
+
+theorem le_trans {a b c: ℚ} (h₁: a ≤ b) (h₂: b ≤ c): a ≤ c := by
+  sorry
+
+theorem le_antisymm {a b: ℚ} (h₁: a ≤ b) (h₂: b ≤ a): a = b := by
+  sorry
+
+theorem le_total (a b: ℚ): a ≤ b ∨ b ≤ a := by
+  sorry
+
+theorem add_le_add_left (a: ℚ) {b c: ℚ} (h: b ≤ c): a + b ≤ a + c := by
+  sorry
+
+theorem add_le_add_right {a b: ℚ} (c: ℚ) (h: a ≤ b): a + c ≤ b + c := by
+  sorry
+
+theorem mul_le_mul_left {a b: ℚ} (c: ℚ) (hc: 0 < c) (h: a ≤ b): c * a ≤ c * b := by
+  sorry
+
+theorem zero_le_one: (0: ℚ) ≤ 1 := by
+  sorry
+
+
+
 -- More theorems and definitions.
+
+theorem one_ne_zero: (1: ℚ) ≠ 0 := by
+  sorry
+
+theorem no_zero_divisors {a b: ℚ}: (a ≠ 0 ∧ b ≠ 0) → a * b ≠ 0 := by
+  sorry
 
 instance {a b: ℚ}: Decidable (a ≤ b) := sorry
 

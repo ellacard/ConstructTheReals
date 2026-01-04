@@ -1,3 +1,4 @@
+import ConstructTheReals.Logic
 import ConstructTheReals.Natural
 
 /-
@@ -9,23 +10,26 @@ thus adjoining additive inverses for every element of ℕ.
 Then, lift the operations + and * and the order ≤ to ℤ.
 
 Properties of ℤ:
-- (ℤ, +) is a cancellative commutative group
+- (ℤ, +) is a commutative group
 - (ℤ, *) is a commutative monoid
 - (ℤ, +, *) is an integral domain (a nonzero commutative ring with no zero divisors)
-- (ℤ, ≤) is a lattice
+- <order>
 
 -/
 
 -- Define the quotient on ℕ ⨯ ℕ.
 
+def ℤ.relation: ℕ × ℕ → ℕ × ℕ → Prop :=
+  λ (a₁, a₂) (b₁, b₂) ↦ a₁ + b₂ = b₁ + a₂
+
 def ℤ: Type := @Quotient (ℕ × ℕ) {
-  r := λ (a₁, a₂) (b₁, b₂) ↦ a₁ + b₂ = b₁ + a₂
+  r := ℤ.relation
   iseqv := {
     refl := by intro; rfl
     symm := Eq.symm
     trans := by
       intro (a₁, a₂) (b₁, b₂) (c₁, c₂)
-      simp
+      simp [ℤ.relation]
       intro h₁ h₂
       apply ℕ.add_cancel_left b₂
       apply ℕ.add_cancel_right b₁
@@ -41,6 +45,17 @@ def ℤ: Type := @Quotient (ℕ × ℕ) {
 }
 
 namespace ℤ
+
+instance: HasEquiv (ℕ × ℕ) := ⟨ℤ.relation⟩
+
+theorem equiv_iff (a₁ a₂ b₁ b₂: ℕ): (a₁, a₂) ≈ (b₁, b₂) ↔ a₁ + b₂ = b₁ + a₂ := by
+  rfl
+
+
+
+-- Embedding of ℕ in ℤ.
+
+instance: Coe ℕ ℤ := ⟨λ n ↦ Quotient.mk _ (n, 0)⟩
 
 
 
@@ -78,22 +93,6 @@ def add (a b: ℤ): ℤ :=
 
 instance: Add ℤ := ⟨add⟩
 
--- Addition theorems.
-
-theorem add_zero_left (a: ℤ): 0 + a = a := by
-  refine Quotient.inductionOn a ?_
-  intro _
-  apply Quotient.sound
-  simp [ℕ.add_zero_left]
-  rfl
-
-theorem add_zero_right (a: ℤ): a + 0 = a := by
-  refine Quotient.inductionOn a ?_
-  intro _
-  apply Quotient.sound
-  simp [ℕ.add_zero_right]
-  rfl
-
 
 
 -- Define subtraction.
@@ -125,28 +124,13 @@ def mul (a b: ℤ): ℤ :=
   ( by
     intro (a₁, a₂) (b₁, b₂) (c₁, c₂) (d₁, d₂) h h'
     apply Quotient.sound
-    change a₁ + c₂ = c₁ + a₂ at h
-    change b₁ + d₂ = d₁ + b₂ at h'
+    simp [equiv_iff] at h h'
     calc
       (a₁ * b₁ + a₂ * b₂) + (c₁ * d₂ + c₂ * d₁)
       _ = (c₁ * d₁ + c₂ * d₂) + (a₁ * b₂ + a₂ * b₁) := by sorry
   )
 
 instance: Mul ℤ := ⟨mul⟩
-
--- Multiplication theorems.
-
-theorem mul_assoc {a b c: ℤ}: (a * b) * c = a * (b * c) := by
-  sorry
-
-theorem mul_comm {a b: ℤ}: a * b = b * a := by
-  sorry
-
-theorem mul_cancel_left {a b c: ℤ} (h: a ≠ 0): a * b = a * c → b = c := by
-  sorry
-
-theorem mul_cancel_right {a b c: ℤ} (h: c ≠ 0): a * c = b * c → a = b := by
-  sorry
 
 
 
@@ -156,8 +140,7 @@ def le (a b: ℤ): Prop :=
   Quotient.liftOn₂ a b (λ (a₁, a₂) (b₁, b₂) ↦ a₁ + b₂ ≤ b₁ + a₂)
   ( by
     intro (a₁, a₂) (b₁, b₂) (c₁, c₂) (d₁, d₂) hac hbd
-    change a₁ + c₂ = c₁ + a₂ at hac
-    change b₁ + d₂ = d₁ + b₂ at hbd
+    simp [equiv_iff] at hac hbd
     simp
     constructor
     · intro h
@@ -203,6 +186,138 @@ instance: LE ℤ := ⟨le⟩
 
 
 
+-- Addition theorems.
+
+theorem add_comm (a b: ℤ): a + b = b + a := by
+  sorry
+
+theorem add_assoc (a b c: ℤ): a + b + c = a + (b + c) := by
+  sorry
+
+theorem add_zero_left (a: ℤ): 0 + a = a := by
+  refine Quotient.inductionOn a ?_
+  intro _
+  apply Quotient.sound
+  simp [ℕ.add_zero_left]
+  rfl
+
+theorem add_zero_right (a: ℤ): a + 0 = a := by
+  refine Quotient.inductionOn a ?_
+  intro _
+  apply Quotient.sound
+  simp [ℕ.add_zero_right]
+  rfl
+
+
+
+-- Multiplication theorems.
+
+theorem mul_comm (a b: ℤ): a * b = b * a := by
+  refine Quotient.inductionOn₂ a b ?_
+  intro ⟨a₁, a₂⟩ ⟨b₁, b₂⟩
+  apply Quotient.sound
+  simp [equiv_iff]
+  calc
+    a₁ * b₁ + a₂ * b₂ + (b₁ * a₂ + b₂ * a₁)
+  _ = b₁ * a₁ + b₂ * a₂ + (a₂ * b₁ + a₁ * b₂) := by simp [ℕ.mul_comm]
+  _ = b₁ * a₁ + b₂ * a₂ + (a₁ * b₂ + a₂ * b₁) := by simp [ℕ.add_comm]
+
+theorem mul_assoc {a b c: ℤ}: (a * b) * c = a * (b * c) := by
+  refine Quotient.inductionOn₃ a b c ?_
+  intro ⟨a₁, a₂⟩ ⟨b₁, b₂⟩ ⟨c₁, c₂⟩
+  apply Quotient.sound
+  simp [equiv_iff]
+  calc
+    (a₁ * b₁ + a₂ * b₂) * c₁ + (a₁ * b₂ + a₂ * b₁) * c₂ + (a₁ * (b₁ * c₂ + b₂ * c₁) + a₂ * (b₁ * c₁ + b₂ * c₂))
+    _ = a₁ * (b₁ * c₁ + b₂ * c₂) + a₂ * (b₁ * c₂ + b₂ * c₁) + ((a₁ * b₁ + a₂ * b₂) * c₂ + (a₁ * b₂ + a₂ * b₁) * c₁) := by sorry
+
+theorem mul_one_left (a: ℤ): 1 * a = a := by
+  sorry
+
+theorem mul_one_right (a: ℤ): a * 1 = a := by
+  sorry
+
+theorem mul_zero_left (a: ℤ): 0 * a = 0 := by
+  refine Quotient.inductionOn a ?_
+  intro _
+  apply Quotient.sound
+  simp [equiv_iff, ℕ.mul_zero_left, ℕ.add_zero_left]
+
+theorem mul_zero_right {a: ℤ}: a * 0 = 0 := by
+  refine Quotient.inductionOn a ?_
+  intro _
+  apply Quotient.sound
+  simp [equiv_iff, ℕ.mul_zero_right, ℕ.add_zero_right]
+
+theorem distrib_left (a b c: ℤ): a * (b + c) = a * b + a * c := by
+  sorry
+
+theorem distrib_right (a b c: ℤ): (a + b) * c = a * c + b * c := by
+  sorry
+
+theorem mul_cancel_left {a b c: ℤ} (h: a ≠ 0): a * b = a * c → b = c := by
+  sorry
+
+theorem mul_cancel_right {a b c: ℤ} (h: c ≠ 0): a * c = b * c → a = b := by
+  intro h'
+  rw [mul_comm a c, mul_comm b c] at h'
+  exact mul_cancel_left h h'
+
+
+
+-- Subtraction theorems.
+
+theorem add_left_neg (a: ℤ): -a + a = 0 := by
+  sorry
+
+theorem add_right_neg (a: ℤ): a + -a = 0 := by
+  sorry
+
+theorem neg_neg (a: ℤ): -(-a) = a := by
+  sorry
+
+theorem neg_zero: (-0: ℤ) = 0 := by
+  sorry
+
+theorem neg_add (a b: ℤ): -(a + b) = -a + -b := by
+  sorry
+
+theorem neg_mul_left (a b: ℤ): (-a) * b = -(a * b) := by
+  sorry
+
+theorem neg_mul_right (a b: ℤ): a * (-b) = -(a * b) := by
+  sorry
+
+
+
+-- Order theorems.
+
+theorem le_refl (a: ℤ): a ≤ a := by
+  sorry
+
+theorem le_trans {a b c: ℤ} (h₁: a ≤ b) (h₂: b ≤ c): a ≤ c := by
+  sorry
+
+theorem le_antisymm {a b: ℤ} (h₁: a ≤ b) (h₂: b ≤ a): a = b := by
+  sorry
+
+theorem le_total (a b: ℤ): a ≤ b ∨ b ≤ a := by
+  sorry
+
+theorem add_le_add_left (a: ℤ) {b c: ℤ} (h: b ≤ c): a + b ≤ a + c := by
+  sorry
+
+theorem add_le_add_right {a b: ℤ} (c: ℤ) (h: a ≤ b): a + c ≤ b + c := by
+  sorry
+
+theorem mul_le_mul_nonneg {a b c: ℤ} (hc: 0 ≤ c) (h: a ≤ b): c * a ≤ c * b := by
+  sorry
+
+theorem zero_le_one: (0: ℤ) ≤ 1 := by
+  sorry
+
+
+
 -- More theorems and definitions.
 
 theorem one_nonzero: (1: ℤ) ≠ 0 := by
@@ -210,5 +325,11 @@ theorem one_nonzero: (1: ℤ) ≠ 0 := by
   have := Quotient.exact h
   contradiction
 
-theorem no_zero_divisors {a b: ℤ} (ha: a ≠ 0) (hb: b ≠ 0): a * b ≠ 0 := by
-  sorry
+theorem no_zero_divisors {a b: ℤ}: (a ≠ 0 ∧ b ≠ 0) → a * b ≠ 0 := by
+  apply contrapose
+  simp
+  intro h h'
+  apply mul_cancel_left (a := a)
+  · exact h'
+  · rw [mul_zero_right]
+    exact h

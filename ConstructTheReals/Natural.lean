@@ -31,6 +31,10 @@ theorem one_eq: one = 1 := by
 theorem one_eq_next_zero: next 0 = 1 := by
   rfl
 
+theorem next_ne_zero (a: ℕ): a.next ≠ 0 := by
+  intro h
+  contradiction
+
 
 
 -- Define addition.
@@ -204,6 +208,18 @@ theorem mul_assoc (a b c: ℕ): a * b * c = a * (b * c) := by
     rw [hp]
     rw [distrib_left a b (b * p)]
 
+theorem mul_eq_zero {a b: ℕ} (h: a * b = 0): a = 0 ∨ b = 0 := by
+  induction a with
+  | zero => exact Or.inl rfl
+  | next p hp =>
+    rw [mul_next_left] at h
+    have hpb : p * b = 0 := add_zero_eq_zero h
+    have hb : b = 0 := by
+      rw [hpb] at h
+      rw [add_zero_left] at h
+      exact h
+    exact Or.inr hb
+
 theorem mul_cancel_right {a b c: ℕ} (h: a * c = b * c) (hc: c ≠ 0): a = b := by
   sorry
 
@@ -276,14 +292,31 @@ theorem le_add_right {a b: ℕ} (c: ℕ) (h: a + c ≤ b + c): a ≤ b := by
 
 theorem le_total (a b: ℕ): a ≤ b ∨ b ≤ a := by
   induction a with
-  | zero =>
-    apply Or.inl
-    exists b
-    rw [zero_eq, add_zero_left]
+  | zero => exact Or.inl (le_bottom b)
   | next p hp =>
     cases hp with
-    | inl h => sorry
-    | inr h => sorry
+    | inl h =>
+      have ⟨k, hk⟩ := h
+      cases k with
+      | zero =>
+        apply Or.inr
+        exists 1
+        have : p + zero = p := rfl
+        rw [this] at hk
+        rw [←hk]
+        exact next_eq
+      | next k =>
+        apply Or.inl
+        exists k
+        rw [add_next_left]
+        rw [add_next_right] at hk
+        exact hk
+    | inr h =>
+      apply Or.inr
+      have ⟨k, hk⟩ := h
+      exists k.next
+      rw [add_next_right]
+      rw [hk]
 
 theorem not_le {a b: ℕ} (h: ¬a ≤ b): ∀ k, ¬a + k = b := by
   exact not_exists.mp h
@@ -320,7 +353,7 @@ instance: ∀ a b: ℕ, Decidable (a ≤ b) := sorry
 def min (a b: ℕ): ℕ :=
   if a ≤ b then a else b
 
-instance: Max ℕ := ⟨min⟩
+instance: Min ℕ := ⟨min⟩
 
 def max (a b: ℕ): ℕ :=
   if a ≤ b then b else a
@@ -345,5 +378,9 @@ theorem max_le_right (a b: ℕ): b ≤ max a b := by
   exact le_refl b
   exact not_le_le h
 
-theorem max_lub (a b c: ℕ) (h₁: a ≤ b) (h₂: b ≤ c): max a b ≤ c := by
-  sorry
+theorem max_lub (a b c: ℕ) (h₁: a ≤ c) (h₂: b ≤ c): max a b ≤ c := by
+  by_cases h: a ≤ b
+  · rw [max, if_pos h]
+    exact h₂
+  · rw [max, if_neg h]
+    exact h₁
