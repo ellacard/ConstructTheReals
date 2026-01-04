@@ -1,6 +1,6 @@
-import ConstructTheReals.General.FieldOfFractions
-import ConstructTheReals.General.Integer
-import ConstructTheReals.General.MetricSpace
+import ConstructTheReals.FieldOfFractions
+import ConstructTheReals.Integer
+import ConstructTheReals.MetricSpace
 
 /-
 

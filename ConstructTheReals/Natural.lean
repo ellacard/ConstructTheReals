@@ -1,10 +1,13 @@
+import ConstructTheReals.Relation
+import ConstructTheReals.Ring
+
 /-
 
 Define the natural numbers ℕ as an inductive type.
 
 Properties of ℕ:
 - (ℕ, +, *) is a commutative semiring
-- <order>
+- (ℕ, ≤) is a lattice
 
 -/
 
@@ -228,6 +231,24 @@ theorem mul_cancel_left {a b c: ℕ} (h: a * b = a * c) (ha: a ≠ 0): b = c := 
 
 
 
+-- Finally, define the commutative semiring on ℕ.
+
+instance CommSemiring: CommSemiring ℕ := {
+  add := add
+  zero := zero
+  add_assoc := add_assoc
+  add_zero := ⟨add_zero_left, add_zero_right⟩
+  add_comm := add_comm
+  mul := mul
+  one := one
+  mul_assoc := mul_assoc
+  mul_one := ⟨mul_one_left, mul_one_right⟩
+  distrib := ⟨distrib_left, distrib_right⟩
+  mul_comm := mul_comm
+}
+
+
+
 -- Define ≤.
 
 def le (a b: ℕ): Prop :=
@@ -383,3 +404,53 @@ theorem max_lub (a b c: ℕ) (h₁: a ≤ c) (h₂: b ≤ c): max a b ≤ c := b
     exact h₂
   · rw [max, if_neg h]
     exact h₁
+
+
+
+-- Finally, define the lattice on ℕ.
+
+instance Lattice: Lattice ℕ := {
+  reflexive := le_refl
+  transitive := @le_trans
+  antisymmetric := @le_antisymm
+  min := ℕ.min
+  max := ℕ.max
+  max_le_left := max_le_left
+  max_le_right := max_le_right
+  max_lub := sorry
+  min_le_left := sorry
+  min_le_right := sorry
+  min_glb := sorry
+}
+
+
+
+
+
+/-
+
+TODO
+Subtraction of natural numbers, truncated at 0. If a result would be less than zero, then the result is zero.
+
+-/
+
+instance: Sub ℕ := {
+  sub := sorry
+}
+
+-- TODO Additional natural number theorems.
+
+theorem le_add_of_sub_le {a b c : ℕ} (h : a - b ≤ c) : a ≤ c + b := by
+  sorry
+
+theorem le_of_add_left_le {n m k : ℕ} (h : k + n ≤ m) : n ≤ m := by
+  sorry
+
+theorem le_sub_of_add_le {a b c : ℕ} (h : a + b ≤ c) : a ≤ c - b := by
+  sorry
+
+theorem sub_add_cancel {n m : ℕ} (h : m ≤ n) : n - m + m = n := by
+  sorry
+
+theorem le_of_not_ge {a b : ℕ} : ¬a ≥ b → a ≤ b := by
+  sorry

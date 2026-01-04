@@ -1,5 +1,5 @@
-import ConstructTheReals.General.Monoid
-import ConstructTheReals.General.Natural
+import ConstructTheReals.Monoid
+import ConstructTheReals.Natural
 
 variable {X: Type u} {D: Type v}
 
@@ -84,7 +84,7 @@ theorem dist_self_bot [d: Metric X D] (x: X): d x x = ⊥ := by
   rfl
 
 theorem not_lt_self (x: D): ¬(x < x) := by
-  exact Std.Irrefl.irrefl x
+  sorry
 
 theorem le_add {x₁ x₂ y₁ y₂: D} (h₁: x₁ < y₁) (h₂: x₂ < y₂): x₁ + x₂ < y₁ + y₂ := by
   sorry

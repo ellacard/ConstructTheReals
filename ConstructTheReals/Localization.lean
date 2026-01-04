@@ -1,4 +1,4 @@
-import ConstructTheReals.General.Monoid
+import ConstructTheReals.Monoid
 
 namespace Localization
 open Monoid

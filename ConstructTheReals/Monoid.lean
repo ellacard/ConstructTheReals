@@ -1,4 +1,4 @@
-import ConstructTheReals.General.Set
+import ConstructTheReals.Set
 
 variable {α: Type u₁} {β: Type u₂}
 

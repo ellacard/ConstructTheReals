@@ -1,5 +1,5 @@
-import ConstructTheReals.General.GroupOfDifferences
-import ConstructTheReals.General.Natural
+import ConstructTheReals.GroupOfDifferences
+import ConstructTheReals.Natural
 
 /-
 

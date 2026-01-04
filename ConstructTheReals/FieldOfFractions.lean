@@ -1,5 +1,5 @@
-import ConstructTheReals.General.Field
-import ConstructTheReals.General.Localization
+import ConstructTheReals.Field
+import ConstructTheReals.Localization
 
 /-
 
@@ -174,8 +174,7 @@ Part 2: Field of fractions
 
 namespace FieldOfFractions
 
-section Basic
-open Classical
+section Main
 variable {α: Type u} [I: IntegralDomain α]
 
 abbrev setoid: Setoid (α × I.nonzero) :=
@@ -193,7 +192,7 @@ def field_of_fractions: Field (@quotient α I) := {
   mul_inverses := sorry
 }
 
-end Basic
+end Main
 end FieldOfFractions
 
 def IntegralDomain.field_of_fractions_type {α: Type u} [I: IntegralDomain α]: Type u :=

@@ -1,6 +1,6 @@
-import ConstructTheReals.General.Group
-import ConstructTheReals.General.Ring
-import ConstructTheReals.General.Localization
+import ConstructTheReals.Group
+import ConstructTheReals.Ring
+import ConstructTheReals.Localization
 
 /-
 
@@ -12,7 +12,7 @@ Part 1: Group of differences
 
 namespace GroupOfDifferences
 
-section Basic
+section Main
 open Monoid
 
 variable {α: Type u} [M: CommMonoid α]
@@ -60,7 +60,7 @@ def group_of_differences: CommGroup (quotient α) := {
     )
 }
 
-end Basic
+end Main
 end GroupOfDifferences
 
 def CommMonoid.group_of_differences {α: Type u} [M: CommMonoid α]: CommGroup (GroupOfDifferences.quotient α) :=

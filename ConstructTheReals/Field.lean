@@ -1,4 +1,4 @@
-import ConstructTheReals.General.Ring
+import ConstructTheReals.Ring
 
 variable {F: Type u}
 
