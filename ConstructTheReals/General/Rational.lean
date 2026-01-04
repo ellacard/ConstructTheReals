@@ -27,7 +27,7 @@ instance ℚ.Lattice: Lattice ℚ :=
 
 
 
--- Define a metric on Q.
+-- Define a metric ℚ × ℚ → ℚ₊.
 
 def NNRational: Type :=
   Subtype (λ x: ℚ ↦ 0 ≤ x)
@@ -38,7 +38,8 @@ instance: DistanceSpace NNRational :=
 instance Rational.metric: Metric ℚ NNRational :=
   sorry
 
--- Also need the endometric on rationals
+-- Define an endometric ℚ₊ × ℚ₊ → ℚ₊.
+
 instance NNRational.endometric: Endometric NNRational :=
   sorry
 

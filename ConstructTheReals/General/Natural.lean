@@ -39,3 +39,31 @@ instance ℕ.Lattice: Lattice ℕ := {
   min_le_right := sorry
   min_glb := sorry
 }
+
+/-
+
+TODO
+Subtraction of natural numbers, truncated at 0. If a result would be less than zero, then the result is zero.
+
+-/
+
+instance: Sub ℕ := {
+  sub := sorry
+}
+
+-- TODO Additional natural number theorems.
+
+theorem ℕ.le_add_of_sub_le {a b c : ℕ} (h : a - b ≤ c) : a ≤ c + b := by
+  sorry
+
+theorem ℕ.le_of_add_left_le {n m k : ℕ} (h : k + n ≤ m) : n ≤ m := by
+  sorry
+
+theorem ℕ.le_sub_of_add_le {a b c : ℕ} (h : a + b ≤ c) : a ≤ c - b := by
+  sorry
+
+theorem ℕ.sub_add_cancel {n m : ℕ} (h : m ≤ n) : n - m + m = n := by
+  sorry
+
+theorem ℕ.le_of_not_ge {a b : ℕ} : ¬a ≥ b → a ≤ b := by
+  sorry

@@ -1,4 +1,5 @@
 import ConstructTheReals.General.Monoid
+import ConstructTheReals.General.Natural
 import ConstructTheReals.General.Order
 
 variable {X: Type u} {D: Type v}
@@ -7,19 +8,21 @@ open Monoid
 
 /-
 
-A (generalized) metric space consists of:
-- a set X
-- a set D with "distance space" structure: ordering ≤, bottom ⊥, addition +.
-- a function d: X × X → D
-- d(x, y) = ⊥ ↔ x = y
-- d(x, y) = d(y, x)
-- Triangle inequality: d(x, z) ≤ d(x, y) + d(x, z)
+A generalized metric space consists of:
 
-TODO: Switch sequences from Nat to ℕ.
+- a set X
+- a set D with "distance space" structure:
+  · ordering ≤
+  · bottom ⊥
+  · addition +
+- a metric d: X × X → D, where:
+  · d(x, y) = ⊥ ↔ x = y
+  · d(x, y) = d(y, x)
+  · Triangle inequality: d(x, z) ≤ d(x, y) + d(x, z)
 
 -/
 
--- Distance space
+-- First, define a "distance space" as a set with an order, bottom element, and addition operation
 
 class DistanceSpace (D: Type v) where
   le: D → D → Prop
@@ -54,7 +57,7 @@ theorem DistanceSpace.bottom_eq_zero [DistanceSpace D]: (⊥: D) = 0 := by
 
 
 
--- Metric space
+-- Then, define a generalized metric space
 
 class Metric (X: Type u) (D: Type v) [DistanceSpace D] where
   distance: X → X → D
@@ -67,8 +70,6 @@ instance [DistanceSpace D] [Metric X D]: CoeFun (Metric X D) (λ _ ↦ X → X �
 }
 
 variable [DistanceSpace D]
-
--- Unpack metric axioms
 
 theorem distance_bot_iff [d: Metric X D]: ∀ x y, d x y = ⊥ ↔ x = y := by
   exact Metric.distance_bot_iff
@@ -83,57 +84,8 @@ theorem dist_self_bot [d: Metric X D] (x: X): d x x = ⊥ := by
   apply (distance_bot_iff x x).mpr
   rfl
 
-
-
--- Sequences
-
-def Sequence (X: Type u): Type u :=
-  Nat → X
-
-def ConvergesTo (d: Metric X D) (a: Sequence X) (x: X): Prop :=
-  ∀ r, ⊥ < r → ∃ n, ∀ m, n ≤ m → d (a m) x < r
-
-def Convergent (d: Metric X D) (a: Sequence X): Prop :=
-  ∃ x, ConvergesTo d a x
-
-theorem constant_sequence_converges (d: Metric X D) (x: X): ConvergesTo d (λ _ ↦ x) x := by
-  intro r hr
-  exists 0
-  intros
-  rw [dist_self_bot]
-  exact hr
-
-def tail (s: Sequence X) (t: Nat): Sequence X :=
-  λ n ↦ s (n + t)
-
-theorem converges_iff_tails_converge (d: Metric X D) (a: Sequence X) (x: X): ConvergesTo d a x ↔ ∀ t, ConvergesTo d (tail a t) x := by
-  constructor
-  · intro h t r hr
-    have ⟨n, hn⟩ := h r hr
-    exists n - t
-    intro m hm
-    apply hn (m + t)
-    exact Nat.le_add_of_sub_le hm
-  · intro h
-    exact h 0
-
-theorem converges_iff_tail_converges (d: Metric X D) (a: Sequence X) (x: X): ConvergesTo d a x ↔ ∃ t, ConvergesTo d (tail a t) x := by
-  constructor
-  · intro h
-    exists 0
-  · intro ⟨t, ht⟩ r hr
-    have ⟨n, hn⟩ := ht r hr
-    exists n + t
-    intro m hm
-    simp [tail] at hn
-    have := hn (m - t) (Nat.le_sub_of_add_le hm)
-    rw [Nat.sub_add_cancel (Nat.le_of_add_left_le hm)] at this
-    exact this
-
 theorem not_lt_self (x: D): ¬(x < x) := by
   exact Std.Irrefl.irrefl x
-
--- Theorems standing in for order structure.
 
 theorem le_add {x₁ x₂ y₁ y₂: D} (h₁: x₁ < y₁) (h₂: x₂ < y₂): x₁ + x₂ < y₁ + y₂ := by
   sorry
@@ -162,6 +114,53 @@ theorem eq_bot_iff (x₀: D): x₀ = ⊥ ↔ ∀ x, ⊥ < x → x₀ < x := by
       have hx₀':= hx x₀
       exact DistanceSpace.le_antisymm _ _ hx₀ hx₀'
 
+
+
+-- Sequences
+
+def Sequence (X: Type u): Type u :=
+  ℕ → X
+
+def ConvergesTo (d: Metric X D) (a: Sequence X) (x: X): Prop :=
+  ∀ r, ⊥ < r → ∃ n, ∀ m, n ≤ m → d (a m) x < r
+
+def Convergent (d: Metric X D) (a: Sequence X): Prop :=
+  ∃ x, ConvergesTo d a x
+
+theorem constant_sequence_converges (d: Metric X D) (x: X): ConvergesTo d (λ _ ↦ x) x := by
+  intro r hr
+  exists 0
+  intros
+  rw [dist_self_bot]
+  exact hr
+
+def tail (s: Sequence X) (t: ℕ): Sequence X :=
+  λ n ↦ s (n + t)
+
+theorem converges_iff_tails_converge (d: Metric X D) (a: Sequence X) (x: X): ConvergesTo d a x ↔ ∀ t, ConvergesTo d (tail a t) x := by
+  constructor
+  · intro h t r hr
+    have ⟨n, hn⟩ := h r hr
+    exists n - t
+    intro m hm
+    apply hn (m + t)
+    exact ℕ.le_add_of_sub_le hm
+  · intro h
+    exact h 0
+
+theorem converges_iff_tail_converges (d: Metric X D) (a: Sequence X) (x: X): ConvergesTo d a x ↔ ∃ t, ConvergesTo d (tail a t) x := by
+  constructor
+  · intro h
+    exists 0
+  · intro ⟨t, ht⟩ r hr
+    have ⟨n, hn⟩ := ht r hr
+    exists n + t
+    intro m hm
+    simp [tail] at hn
+    have := hn (m - t) (ℕ.le_sub_of_add_le hm)
+    rw [ℕ.sub_add_cancel (ℕ.le_of_add_left_le hm)] at this
+    exact this
+
 theorem limit_unique {d: Metric X D} {a: Sequence X} {x₁ x₂: X} (h₀: DistanceComplete D) (h₁: ConvergesTo d a x₁) (h₂: ConvergesTo d a x₂): x₁ = x₂ := by
   apply (d.distance_bot_iff x₁ x₂).mp
   apply (eq_bot_iff (d x₁ x₂)).mpr
@@ -172,56 +171,19 @@ theorem limit_unique {d: Metric X D} {a: Sequence X} {x₁ x₂: X} (h₀: Dista
   have ⟨n₂, hn₂⟩ := h₂ r hr₁
   by_cases h: n₁ ≤ n₂
   · have dx₁ := (hn₁ n₂ h)
-    have dx₂ := (hn₂ n₂ (Nat.le_refl n₂))
+    have dx₂ := (hn₂ n₂ (ℕ.le_refl n₂))
     rw [distance_symm] at dx₁
     have := le_add dx₁ dx₂
     exact (le_lt_trans (d.distance_triangle x₁ (a n₂) x₂) this)
-  · have dx₂ := (hn₂ n₁ (Nat.le_of_not_ge h))
-    have dx₁ := (hn₁ n₁ (Nat.le_refl n₁))
+  · have dx₂ := (hn₂ n₁ (ℕ.le_of_not_ge h))
+    have dx₁ := (hn₁ n₁ (ℕ.le_refl n₁))
     rw [distance_symm] at dx₂ ⊢
     have := le_add dx₂ dx₁
     exact (le_lt_trans (d.distance_triangle x₂ (a n₁) x₁) this)
 
 
 
--- Open and closed balls
-
-def OpenBall (d: Metric X D) (x₀: X) (r: D): Set X :=
-  λ x ↦ d x₀ x < r
-
-theorem OpenBall.empty (d: Metric X D) (x₀: X): OpenBall d x₀ ⊥ = Set.empty := by
-  funext x; simp
-  constructor
-  · intro ⟨_, _⟩
-    have := DistanceSpace.bottom_le (d x₀ x)
-    contradiction
-  · intro
-    contradiction
-
-def ClosedBall (d: Metric X D) (x₀: X) (r: D): Set X :=
-  λ x ↦ d x₀ x ≤ r
-
-def Sphere (d: Metric X D) (x₀: X) (r: D): Set X :=
-  λ x ↦ d x₀ x = r
-
--- Open set
-
-def is_open_set (d: Metric X D) (S: Set X): Prop :=
-  ∀ x, S x → ∃ r, OpenBall d x r ⊆ S
-
-/-
-  TODO:
-  - monotone ball inclusion
-  - boundedness
-  - continuous functions:
-    - constant, identity, composition are continuous
-  - Product metric
-
--/
-
-
-
--- Cauchy sequence
+-- Cauchy sequences
 
 def Cauchy (d: Metric X D) (a: Sequence X): Prop :=
   ∀ r, ⊥ < r → ∃ N, ∀ m n, N ≤ m → N ≤ n → d (a m) (a n) < r
@@ -239,31 +201,30 @@ theorem cauchy_if_convergent (h₀: DistanceComplete D) {d: Metric X D} {a: Sequ
   have := le_lt_trans (d.distance_triangle (a m) x (a n)) (le_add dm dn)
   exact lt_le_trans this hr₂
 
+
+
+-- Completion of a metric space via the quotient on cauchy sequences
+
 def Complete (d: Metric X D): Prop :=
   ∀ a, Cauchy d a → Convergent d a
-
-
-
--- Given a metric space (X, d) we can build a complete metric space
--- via the quotient on the set of Cauchy sequences
--- by that the relation that their difference converges to zero.
--- i.e. given two cauchy sequences a(n) b(n)
--- a ~ b if d(a(n), b(n)) -> 0.
 
 abbrev Endometric (D: Type u) [DistanceSpace D]: Type u :=
   Metric D D
 
--- TODO incorrect definition, this doesn't require sequences to be cauchy
-def CauchyRelation (d₀: Endometric D) (d: Metric X D): Endorelation (Sequence X) :=
-  λ a b ↦ ConvergesTo d₀ (λ n ↦ d (a n) (b n)) ⊥
-
+-- TODO stupid name
 def Endometric.obedient (d₀: Endometric D): Prop :=
   ∀ r, d₀ r ⊥ = r
+
+def CauchySet (d: Metric X D): Set (ℕ → X) :=
+  λ a ↦ Cauchy d a
+
+def CauchyRelation (d₀: Endometric D) (d: Metric X D): Endorelation (CauchySet d) :=
+  λ ⟨a, _⟩ ⟨b, _⟩ ↦ ConvergesTo d₀ (λ n ↦ d (a n) (b n)) ⊥
 
 theorem CauchyRelation.equiv (hd: DistanceComplete D) (d₀: Endometric D) (hd₀: d₀.obedient) (d: Metric X D): Equivalence (CauchyRelation d₀ d) := {
   refl := by
     intro _ _ hr
-    exists 321
+    exists 0
     intro _ _
     simp [dist_self_bot]
     exact hr
@@ -285,12 +246,11 @@ theorem CauchyRelation.equiv (hd: DistanceComplete D) (d₀: Endometric D) (hd�
     simp_all
     apply lt_le_trans _ hr₂
     sorry
-    -- something broke
     -- apply d.distance_triangle _ (b m)
     -- apply lt_le_trans
     -- apply le_add
-    -- exact hn₁ m (Nat.max_le.mp hm).left
-    -- exact hn₂ m (Nat.max_le.mp hm).right
+    -- exact hn₁ m (ℕ.max_le.mp hm).left
+    -- exact hn₂ m (ℕ.max_le.mp hm).right
     -- exact hr₂
 }
 
