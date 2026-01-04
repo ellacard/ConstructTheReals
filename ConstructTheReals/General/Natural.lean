@@ -1,5 +1,5 @@
 import ConstructTheReals.Natural
-import ConstructTheReals.General.Order
+import ConstructTheReals.General.Relation
 import ConstructTheReals.General.Ring
 
 /-

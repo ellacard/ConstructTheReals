@@ -1,6 +1,5 @@
 import ConstructTheReals.General.Monoid
 import ConstructTheReals.General.Natural
-import ConstructTheReals.General.Order
 
 variable {X: Type u} {D: Type v}
 

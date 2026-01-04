@@ -1,7 +1,43 @@
-import ConstructTheReals.General.Magma
-import ConstructTheReals.General.Pointed
+import ConstructTheReals.General.Set
 
 variable {α: Type u₁} {β: Type u₂}
+
+-- Pointed set
+
+class Pointed (α: Type u) where
+  unit: α
+
+export Pointed (unit)
+namespace Pointed
+scoped instance [Pointed α]: Zero α := ⟨unit⟩
+end Pointed
+
+class Pointed.sub (P: Pointed α) (S: Set α): Prop where
+  unit_mem: 0 ∈ S
+
+
+
+-- Magma
+
+class Magma (α: Type u) where
+  op: α → α → α
+
+class CommMagma (α: Type u) extends Magma α where
+  comm: Commutative op
+
+export Magma (op)
+namespace Magma
+scoped instance [Magma α]: Add α := ⟨op⟩
+end Magma
+open Magma
+
+theorem op_comm [CommMagma α] (a b: α): a + b = b + a := by
+  exact CommMagma.comm a b
+
+class Magma.sub (M: Magma α) (S: Set α): Prop where
+  op_closed: ∀ a b, a ∈ S → b ∈ S → a + b ∈ S
+
+
 
 /-
 
@@ -80,12 +116,14 @@ theorem Monoid.full_sub (M: Monoid α): M.sub (Set.full α) := {
     trivial
 }
 
--- A zero sum free monoid
+-- Zero sum free monoid
 
 def Monoid.zerosumfree (M: Monoid α): Prop :=
   ∀ a b: α, a + b = 0 → a = 0 ∧ b = 0
 
--- Monoid simplifier. Useful for `calc` steps in localization.
+
+
+-- Monoid simplifier. Useful for `calc` steps.
 
 theorem op_swap [CommMonoid α] {a b c: α}: (a + b) + c = (a + c) + b := by
   rw [op_assoc]

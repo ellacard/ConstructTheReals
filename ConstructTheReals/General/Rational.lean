@@ -24,27 +24,3 @@ instance ℚ.Field: Field ℚ :=
 
 instance ℚ.Lattice: Lattice ℚ :=
   sorry
-
-
-
--- Define a metric ℚ × ℚ → ℚ₊.
-
-def NNRational: Type :=
-  Subtype (λ x: ℚ ↦ 0 ≤ x)
-
-instance: DistanceSpace NNRational :=
-  sorry
-
-instance Rational.metric: Metric ℚ NNRational :=
-  sorry
-
--- Define an endometric ℚ₊ × ℚ₊ → ℚ₊.
-
-instance NNRational.endometric: Endometric NNRational :=
-  sorry
-
-theorem NNRational.endometric_obedient: NNRational.endometric.obedient := by
-  sorry
-
-theorem NNRational.distance_complete: DistanceComplete NNRational := by
-  sorry

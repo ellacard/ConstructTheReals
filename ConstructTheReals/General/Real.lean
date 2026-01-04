@@ -10,17 +10,75 @@ Properties of ℝ:
 
 -/
 
+
+
+-- First, define the nonnegative rationals ℚ₊.
+
+def NNRational: Type :=
+  Subtype (λ x: ℚ ↦ 0 ≤ x)
+
+abbrev nnℚ: Type :=
+  NNRational
+
+-- Show ℚ₊ satisfies the necessary properties for a generalized metric space.
+
+instance: DistanceSpace nnℚ := {
+  le := sorry
+  le_refl := sorry
+  le_trans := sorry
+  le_antisymm := sorry
+  bottom := sorry
+  bottom_le := sorry
+  add := sorry
+  add_assoc := sorry
+  add_bottom := sorry
+  le_add := sorry
+}
+
+
+
+-- Next, define a metric ℚ × ℚ → ℚ₊.
+
+instance ℚ.metric: Metric ℚ nnℚ := {
+  distance := sorry
+  distance_bot_iff := sorry
+  distance_symm := sorry
+  distance_triangle := sorry
+}
+
+instance nnℚ.endometric: Endometric nnℚ := {
+  distance := sorry
+  distance_bot_iff := sorry
+  distance_symm := sorry
+  distance_triangle := sorry
+}
+
+-- Show the metrics satisfy the necessary properties for the Cauchy sequence equivalence.
+
+theorem nnℚ.endometric_obedient: nnℚ.endometric.obedient := by
+  sorry
+
+theorem nnℚ.distance_complete: DistanceComplete nnℚ := by
+  sorry
+
+
+
+-- Finally, define the real numbers as the quotient on cauchy sequences of rationals using the above metrics on ℚ.
+
 def Real: Type :=
   CauchyRelation.quotient
-    NNRational.distance_complete
-    NNRational.endometric
-    NNRational.endometric_obedient
-    Rational.metric
+    nnℚ.distance_complete
+    nnℚ.endometric
+    nnℚ.endometric_obedient
+    ℚ.metric
 
 abbrev ℝ: Type :=
   Real
 
+
+
 -- ℝ is a field.
+-- TODO this will take a lot of work..
 
 instance ℝ.Field: Field ℝ := {
   add := sorry
@@ -40,7 +98,10 @@ instance ℝ.Field: Field ℝ := {
   mul_inverses := sorry
 }
 
+
+
 -- ℝ is a lattice.
+-- TODO this too..
 
 instance ℝ.Lattice: Lattice ℝ := {
   le := sorry
@@ -56,5 +117,7 @@ instance ℝ.Lattice: Lattice ℝ := {
   min_le_right := sorry
   min_glb := sorry
 }
+
+
 
 -- TODO More properties of ℝ
