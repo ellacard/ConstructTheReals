@@ -10,55 +10,86 @@ Properties of ℝ:
 
 -/
 
+-- First, show ℚ₊ satisfies the necessary properties for a generalized metric space.
 
+instance: Coe NNℚ ℚ := ⟨λ ⟨q, _⟩ ↦ q⟩
 
--- First, define the nonnegative rationals ℚ₊.
-
-def NNRational: Type :=
-  Subtype (λ x: ℚ ↦ 0 ≤ x)
-
-abbrev nnℚ: Type :=
-  NNRational
-
--- Show ℚ₊ satisfies the necessary properties for a generalized metric space.
-
-instance: DistanceSpace nnℚ := {
-  le := sorry
-  le_refl := sorry
-  le_trans := sorry
-  le_antisymm := sorry
-  bottom := sorry
-  bottom_le := sorry
-  add := sorry
-  add_assoc := sorry
-  add_bottom := sorry
-  le_add := sorry
+instance: DistanceSpace NNℚ := {
+  le          := λ a b ↦ ℚ.Lattice.le a b
+  le_refl     := λ a ↦ ℚ.Lattice.reflexive a
+  le_trans    := λ a b c ↦ ℚ.Lattice.transitive a b c
+  le_antisymm := λ a b h₁ h₂ ↦ Subtype.ext (ℚ.Lattice.antisymmetric a b h₁ h₂)
+  bottom := ⟨0, ℚ.Lattice.reflexive 0⟩
+  bottom_le := λ ⟨_, ha⟩ ↦ ha
+  add := λ ⟨a, ha⟩ ⟨b, hb⟩ ↦ ⟨a + b, sorry⟩
+  add_assoc := by
+    intro ⟨a, ha⟩ ⟨b, hb⟩ ⟨c, hc⟩
+    simp
+    sorry
+  add_bottom := by
+    constructor
+    · intro ⟨_, _⟩
+      simp [add_zero_left]
+    · intro ⟨_, _⟩
+      simp [add_zero_right]
+  le_add := by
+    intro ⟨a, ha⟩ ⟨b, hb⟩ ⟨c, hc⟩
+    simp
+    constructor
+    · intro h
+      sorry
+    · intro h
+      sorry
 }
 
 
 
 -- Next, define a metric ℚ × ℚ → ℚ₊.
 
-instance ℚ.metric: Metric ℚ nnℚ := {
-  distance := sorry
-  distance_bot_iff := sorry
-  distance_symm := sorry
-  distance_triangle := sorry
+instance ℚ.metric: Metric ℚ NNℚ := {
+  distance := λ a b ↦ NNℚ.abs (a - b)
+  distance_bot_iff := by
+    intro a b
+    constructor
+    · intro h
+      sorry
+    · intro h
+      sorry
+  distance_symm := by
+    intro a b
+    sorry
+  distance_triangle := by
+    intro a b c
+    sorry
 }
 
-instance nnℚ.endometric: Endometric nnℚ := {
-  distance := sorry
+instance NNℚ.endometric: Endometric NNℚ := {
+  distance := λ a b ↦ ℚ.metric.distance a b
   distance_bot_iff := sorry
-  distance_symm := sorry
-  distance_triangle := sorry
+  distance_symm := λ a b ↦ ℚ.metric.distance_symm a b
+  distance_triangle := λ a b c ↦ ℚ.metric.distance_triangle a b c
 }
+
+theorem dist_eq {a b: NNℚ}: NNℚ.endometric.distance a b = NNℚ.abs (a - b) := by
+  rfl
 
 -- Show the metrics satisfy the necessary properties for the Cauchy sequence equivalence.
 
-theorem nnℚ.endometric_obedient: nnℚ.endometric.obedient := by
-  sorry
+theorem NNℚ.endometric_obedient: NNℚ.endometric.obedient := by
+  intro ⟨r, hr⟩
+  simp [dist_eq]
+  simp [sub_zero_right]
+  by_cases h: 0 ≤ r
+  · simp [abs_eq', if_pos h]
+  · contradiction
 
-theorem nnℚ.distance_complete: DistanceComplete nnℚ := by
+-- This is unnecessarily complicated? maybe we should do a less general metric?
+instance: Div NNℚ := ⟨sorry⟩
+instance: Coe ℕ NNℚ := ⟨sorry⟩
+
+theorem NNℚ.distance_complete: DistanceComplete NNℚ := by
+  intro a ha
+  --exists a / 2
   sorry
 
 
@@ -67,9 +98,9 @@ theorem nnℚ.distance_complete: DistanceComplete nnℚ := by
 
 def Real: Type :=
   CauchyRelation.quotient
-    nnℚ.distance_complete
-    nnℚ.endometric
-    nnℚ.endometric_obedient
+    NNℚ.distance_complete
+    NNℚ.endometric
+    NNℚ.endometric_obedient
     ℚ.metric
 
 abbrev ℝ: Type :=

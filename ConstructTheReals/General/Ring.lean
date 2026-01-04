@@ -133,6 +133,9 @@ theorem neg_sub' [Ring α] (a b: α): -(a - b) = -a + b := by
 theorem neg_zero [Ring α]: -(0: α) = 0 := by
   apply inv_unit
 
+theorem sub_zero_right [Ring α] (a: α): a - 0 = a := by
+  sorry
+
 theorem mul_comm [CommSemiring α] (a b: α): a * b = b * a := by
   apply CommSemiring.mul_comm
 

@@ -212,7 +212,7 @@ abbrev Endometric (D: Type u) [DistanceSpace D]: Type u :=
 
 -- TODO stupid name
 def Endometric.obedient (d₀: Endometric D): Prop :=
-  ∀ r, d₀ r ⊥ = r
+  ∀ r, d₀.distance r ⊥ = r
 
 def CauchySet (d: Metric X D): Set (ℕ → X) :=
   λ a ↦ Cauchy d a

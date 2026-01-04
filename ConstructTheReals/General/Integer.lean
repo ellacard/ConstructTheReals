@@ -28,3 +28,16 @@ instance ℤ.IntegralDomain: IntegralDomain ℤ := {
 
 instance ℤ.Lattice: Lattice ℤ :=
  sorry
+
+
+
+ -- Other integer theorems.
+
+ theorem ℤ.one_nonzero: (1: ℤ) ≠ 0 := by
+  sorry
+
+
+
+-- Embedding of ℕ in ℤ.
+
+instance: Coe ℕ ℤ := ⟨λ n ↦ Quotient.mk _ (n, ⟨0, trivial⟩)⟩
