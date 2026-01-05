@@ -12,47 +12,42 @@ A generalized metric space consists of:
 - a set X
 - a set D with "distance space" structure:
   · ordering ≤
-  · bottom ⊥
+  · zero 0
   · addition +
+  · "completition" ie. ability to divide by 2
 - a metric d: X × X → D, where:
-  · d(x, y) = ⊥ ↔ x = y
+  . 0 ≤ d(x, y)
+  · d(x, y) = 0 ↔ x = y
   · d(x, y) = d(y, x)
   · Triangle inequality: d(x, z) ≤ d(x, y) + d(x, z)
 
 -/
 
--- First, define a "distance space" as a set with an order, bottom element, and addition operation
+-- First, define a "distance space" as a set with an order, zero element, and addition operation
 
 class DistanceSpace (D: Type v) where
   le: D → D → Prop
   le_refl: ∀ d, le d d
   le_trans: ∀ d₁ d₂ d₃, le d₁ d₂ → le d₂ d₃ → le d₁ d₃
   le_antisymm: ∀ d₁ d₂, le d₁ d₂ → le d₂ d₁ → d₁ = d₂
-  bottom: D
-  bottom_le: ∀ x, le bottom x
+  zero: D
   add: D → D → D
   add_assoc: Associative add
-  add_bottom: Identity add bottom
+  add_zero: Identity add zero
   le_add: ∀ d₁ d₂ d, le d₁ d₂ ↔ le (add d₁ d) (add d₂ d)
+  complete: ∀ d: D, (le zero d ∧ zero ≠ d) → ∃ r, (le zero r ∧ zero ≠ r) ∧ le (add r r) d
 
-instance [DistanceSpace D]: Bottom D := {
-  le := DistanceSpace.le
-  bottom := DistanceSpace.bottom
-  bottom_le := DistanceSpace.bottom_le
-}
+instance [DistanceSpace D]: LE D := ⟨DistanceSpace.le⟩
 
 instance [DistanceSpace D]: Monoid D := {
   op := DistanceSpace.add
-  unit := DistanceSpace.bottom
-  identity := DistanceSpace.add_bottom
+  unit := DistanceSpace.zero
+  identity := DistanceSpace.add_zero
   assoc := DistanceSpace.add_assoc
 }
 
-def DistanceComplete (D: Type v) [DistanceSpace D]: Prop :=
-  ∀ d: D, ⊥ < d → ∃ r, ⊥ < r ∧ r + r ≤ d
-
-theorem DistanceSpace.bottom_eq_zero [DistanceSpace D]: (⊥: D) = 0 := by
-  rfl
+theorem distance_complete [DistanceSpace D]: ∀ d: D, 0 < d → ∃ r, 0 < r ∧ r + r ≤ d := by
+  exact DistanceSpace.complete
 
 
 
@@ -60,7 +55,8 @@ theorem DistanceSpace.bottom_eq_zero [DistanceSpace D]: (⊥: D) = 0 := by
 
 class Metric (X: Type u) (D: Type v) [DistanceSpace D] where
   distance: X → X → D
-  distance_bot_iff: ∀ x y, distance x y = ⊥ ↔ x = y
+  distance_le: ∀ x y, 0 ≤ distance x y
+  distance_zero_iff: ∀ x y, distance x y = 0 ↔ x = y
   distance_symm: ∀ x y, distance x y = distance y x
   distance_triangle: ∀ x y z, distance x z ≤ distance x y + distance y z
 
@@ -70,8 +66,11 @@ instance [DistanceSpace D] [Metric X D]: CoeFun (Metric X D) (λ _ ↦ X → X �
 
 variable [DistanceSpace D]
 
-theorem distance_bot_iff [d: Metric X D]: ∀ x y, d x y = ⊥ ↔ x = y := by
-  exact Metric.distance_bot_iff
+theorem distance_le [d: Metric X D]: ∀ x y, 0 ≤ d x y := by
+  exact Metric.distance_le
+
+theorem distance_zero_iff [d: Metric X D]: ∀ x y, d x y = 0 ↔ x = y := by
+  exact Metric.distance_zero_iff
 
 theorem distance_symm [d: Metric X D]: ∀ x y, d x y = d y x := by
   exact Metric.distance_symm
@@ -79,8 +78,8 @@ theorem distance_symm [d: Metric X D]: ∀ x y, d x y = d y x := by
 theorem distance_triangle [d: Metric X D]: ∀ x y z, d x z ≤ d x y + d y z := by
   exact Metric.distance_triangle
 
-theorem dist_self_bot [d: Metric X D] (x: X): d x x = ⊥ := by
-  apply (distance_bot_iff x x).mpr
+theorem dist_self_zero [d: Metric X D] (x: X): d x x = 0 := by
+  apply (distance_zero_iff x x).mpr
   rfl
 
 theorem not_lt_self (x: D): ¬(x < x) := by
@@ -98,21 +97,6 @@ theorem lt_le_trans {x y z: D} (h₁: x < y) (h₂: y ≤ z): x < z := by
 theorem not_lt {x y: D}: ¬x < y ↔ y ≤ x := by
   sorry
 
-theorem eq_bot_iff (x₀: D): x₀ = ⊥ ↔ ∀ x, ⊥ < x → x₀ < x := by
-  constructor
-  · intro h _ hx
-    exact lt_of_eq_of_lt h hx
-  · intro h
-    have h' := h x₀
-    by_cases hx: ⊥ < x₀
-    · have := h' hx
-      have := not_lt_self x₀
-      contradiction
-    · have hx₀: x₀ ≤ ⊥ := by exact not_lt.mp hx
-      have hx: ∀ x: D, ⊥ ≤ x := by exact Bottom.bottom_le
-      have hx₀':= hx x₀
-      exact DistanceSpace.le_antisymm _ _ hx₀ hx₀'
-
 
 
 -- Sequences
@@ -120,23 +104,26 @@ theorem eq_bot_iff (x₀: D): x₀ = ⊥ ↔ ∀ x, ⊥ < x → x₀ < x := by
 def Sequence (X: Type u): Type u :=
   ℕ → X
 
-def ConvergesTo (d: Metric X D) (a: Sequence X) (x: X): Prop :=
-  ∀ r, ⊥ < r → ∃ n, ∀ m, n ≤ m → d (a m) x < r
+def ConstantSequence (x: X): Sequence X :=
+  λ _ ↦ x
 
-def Convergent (d: Metric X D) (a: Sequence X): Prop :=
-  ∃ x, ConvergesTo d a x
+def converges_to (d: Metric X D) (a: Sequence X) (x: X): Prop :=
+  ∀ r, 0 < r → ∃ n, ∀ m, n ≤ m → d (a m) x < r
 
-theorem constant_sequence_converges (d: Metric X D) (x: X): ConvergesTo d (λ _ ↦ x) x := by
+def convergent (d: Metric X D) (a: Sequence X): Prop :=
+  ∃ x, converges_to d a x
+
+theorem constant_sequence_converges (d: Metric X D) (x: X): converges_to d (ConstantSequence x) x := by
   intro r hr
   exists 0
   intros
-  rw [dist_self_bot]
+  rw [ConstantSequence, dist_self_zero]
   exact hr
 
 def tail (s: Sequence X) (t: ℕ): Sequence X :=
   λ n ↦ s (n + t)
 
-theorem converges_iff_tails_converge (d: Metric X D) (a: Sequence X) (x: X): ConvergesTo d a x ↔ ∀ t, ConvergesTo d (tail a t) x := by
+theorem converges_iff_tails_converge (d: Metric X D) (a: Sequence X) (x: X): converges_to d a x ↔ ∀ t, converges_to d (tail a t) x := by
   constructor
   · intro h t r hr
     have ⟨n, hn⟩ := h r hr
@@ -147,7 +134,7 @@ theorem converges_iff_tails_converge (d: Metric X D) (a: Sequence X) (x: X): Con
   · intro h
     exact h 0
 
-theorem converges_iff_tail_converges (d: Metric X D) (a: Sequence X) (x: X): ConvergesTo d a x ↔ ∃ t, ConvergesTo d (tail a t) x := by
+theorem converges_iff_tail_converges (d: Metric X D) (a: Sequence X) (x: X): converges_to d a x ↔ ∃ t, converges_to d (tail a t) x := by
   constructor
   · intro h
     exists 0
@@ -160,37 +147,17 @@ theorem converges_iff_tail_converges (d: Metric X D) (a: Sequence X) (x: X): Con
     rw [ℕ.sub_add_cancel (ℕ.le_of_add_left_le hm)] at this
     exact this
 
-theorem limit_unique {d: Metric X D} {a: Sequence X} {x₁ x₂: X} (h₀: DistanceComplete D) (h₁: ConvergesTo d a x₁) (h₂: ConvergesTo d a x₂): x₁ = x₂ := by
-  apply (d.distance_bot_iff x₁ x₂).mp
-  apply (eq_bot_iff (d x₁ x₂)).mpr
-  intro r₀ hr₀
-  have ⟨r, hr₁, hr₂⟩  := h₀ r₀ hr₀
-  apply lt_le_trans _ hr₂
-  have ⟨n₁, hn₁⟩ := h₁ r hr₁
-  have ⟨n₂, hn₂⟩ := h₂ r hr₁
-  by_cases h: n₁ ≤ n₂
-  · have dx₁ := (hn₁ n₂ h)
-    have dx₂ := (hn₂ n₂ (ℕ.le_refl n₂))
-    rw [distance_symm] at dx₁
-    have := le_add dx₁ dx₂
-    exact (le_lt_trans (d.distance_triangle x₁ (a n₂) x₂) this)
-  · have dx₂ := (hn₂ n₁ (ℕ.le_of_not_ge h))
-    have dx₁ := (hn₁ n₁ (ℕ.le_refl n₁))
-    rw [distance_symm] at dx₂ ⊢
-    have := le_add dx₂ dx₁
-    exact (le_lt_trans (d.distance_triangle x₂ (a n₁) x₁) this)
-
 
 
 -- Cauchy sequences
 
 def Cauchy (d: Metric X D) (a: Sequence X): Prop :=
-  ∀ r, ⊥ < r → ∃ N, ∀ m n, N ≤ m → N ≤ n → d (a m) (a n) < r
+  ∀ r, 0 < r → ∃ N, ∀ m n, N ≤ m → N ≤ n → d (a m) (a n) < r
 
-theorem cauchy_if_convergent (h₀: DistanceComplete D) {d: Metric X D} {a: Sequence X} (h: Convergent d a): Cauchy d a := by
+theorem cauchy_if_convergent {d: Metric X D} {a: Sequence X} (h: convergent d a): Cauchy d a := by
   intro r₀ hr₀
   have ⟨x, hx⟩ := h
-  have ⟨r, hr₁, hr₂⟩ := h₀ r₀ hr₀
+  have ⟨r, hr₁, hr₂⟩ := distance_complete r₀ hr₀
   have ⟨N, hN⟩ := hx r hr₁
   exists N
   intro m n hm hn
@@ -200,32 +167,28 @@ theorem cauchy_if_convergent (h₀: DistanceComplete D) {d: Metric X D} {a: Sequ
   have := le_lt_trans (d.distance_triangle (a m) x (a n)) (le_add dm dn)
   exact lt_le_trans this hr₂
 
+theorem constant_sequence_cauchy {d: Metric X D} {x: X}: Cauchy d (ConstantSequence x) := by
+  have: convergent d (ConstantSequence x) := by
+    exists x
+    exact constant_sequence_converges d x
+  exact cauchy_if_convergent this
+
 
 
 -- Completion of a metric space via the quotient on cauchy sequences
 
-def Complete (d: Metric X D): Prop :=
-  ∀ a, Cauchy d a → Convergent d a
-
-abbrev Endometric (D: Type u) [DistanceSpace D]: Type u :=
-  Metric D D
-
--- TODO stupid name
-def Endometric.obedient (d₀: Endometric D): Prop :=
-  ∀ r, d₀.distance r ⊥ = r
-
-def CauchySet (d: Metric X D): Set (ℕ → X) :=
+def CauchySet (d: Metric D D): Set (ℕ → D) :=
   λ a ↦ Cauchy d a
 
-def CauchyRelation (d₀: Endometric D) (d: Metric X D): Endorelation (CauchySet d) :=
-  λ ⟨a, _⟩ ⟨b, _⟩ ↦ ConvergesTo d₀ (λ n ↦ d (a n) (b n)) ⊥
+def CauchyRelation (d: Metric D D): Endorelation (CauchySet d) :=
+  λ ⟨a, _⟩ ⟨b, _⟩ ↦ converges_to d (λ n ↦ d (a n) (b n)) 0
 
-theorem CauchyRelation.equiv (hd: DistanceComplete D) (d₀: Endometric D) (hd₀: d₀.obedient) (d: Metric X D): Equivalence (CauchyRelation d₀ d) := {
+theorem CauchyRelation.equiv (d: Metric D D): Equivalence (CauchyRelation d) := {
   refl := by
     intro _ _ hr
     exists 0
     intro _ _
-    simp [dist_self_bot]
+    simp [dist_self_zero]
     exact hr
   symm := by
     intro _ _ h r hr
@@ -233,25 +196,24 @@ theorem CauchyRelation.equiv (hd: DistanceComplete D) (d₀: Endometric D) (hd�
     exists n
     intro m hm
     simp [d.distance_symm]
-    exact hn m hm
+    --exact hn m hm
+    sorry
   trans := by
     intro a b c h₁ h₂
     intro r hr
-    have ⟨r₀, hr₁, hr₂⟩ := hd r hr
+    have ⟨r₀, hr₁, hr₂⟩ := distance_complete r hr
     have ⟨n₁, hn₁⟩ := h₁ r₀ hr₁
     have ⟨n₂, hn₂⟩ := h₂ r₀ hr₁
     exists max n₁ n₂
     intro m hm
-    simp_all
-    apply lt_le_trans _ hr₂
+    have h₁' := hn₁ m (ℕ.le_trans (ℕ.max_le_left n₁ n₂) hm)
+    have h₂' := hn₂ m (ℕ.le_trans (ℕ.max_le_right n₁ n₂) hm)
+    simp at h₁' h₂'
     sorry
-    -- apply d.distance_triangle _ (b m)
-    -- apply lt_le_trans
-    -- apply le_add
-    -- exact hn₁ m (ℕ.max_le.mp hm).left
-    -- exact hn₂ m (ℕ.max_le.mp hm).right
-    -- exact hr₂
 }
 
-def CauchyRelation.quotient (hd: DistanceComplete D) (d₀: Endometric D) (hd₀: d₀.obedient) (d: Metric X D): Type u :=
-  Quotient ⟨CauchyRelation d₀ d, CauchyRelation.equiv hd d₀ hd₀ d⟩
+def CauchyRelation.quotient (d: Metric D D): Type v :=
+  Quotient ⟨CauchyRelation d, CauchyRelation.equiv d⟩
+
+def Complete (d: Metric X D): Prop :=
+  ∀ a, Cauchy d a → convergent d a

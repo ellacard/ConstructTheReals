@@ -19,21 +19,38 @@ def Rational: Type :=
 abbrev ℚ: Type :=
   Rational
 
-instance ℚ.Field: Field ℚ :=
+namespace ℚ
+
+instance Field: Field ℚ :=
   ℤ.IntegralDomain.field_of_fractions
 
-instance ℚ.Lattice: Lattice ℚ :=
+-- TODO add to Field file
+instance: Div ℚ := ⟨sorry⟩
+
+instance Lattice: Lattice ℚ :=
   sorry
 
 
 
--- Define the nonnegative rationals.
+-- More theorems
 
-def NNRational: Type :=
-  Subtype (λ x: ℚ ↦ 0 ≤ x)
+theorem le_add_left {a b c: ℚ} (h: b ≤ c): a + b ≤ a + c := by
+  sorry
 
-abbrev NNℚ: Type :=
-  NNRational
+theorem le_add_right {a b c: ℚ} (h: a ≤ b): a + c ≤ b + c := by
+  sorry
+
+theorem le_add_left' (a: ℚ) {b c: ℚ} (h: a + b ≤ a + c): b ≤ c := by
+  sorry
+
+theorem le_add_right' {a b: ℚ} (c: ℚ) (h: a + c ≤ b + c): a ≤ b := by
+  sorry
+
+theorem div_nonnegative_nonnegative {a b: ℚ} (ha: 0 ≤ a) (hb: 0 ≤ b) (hb₀: b ≠ 0): 0 ≤ a / b := by
+  sorry
+
+theorem div_nonzero {a b: ℚ} (ha: a ≠ 0) (hb: b ≠ 0): a / b ≠ 0 := by
+  sorry
 
 
 
@@ -41,7 +58,7 @@ abbrev NNℚ: Type :=
 
 instance: ∀ a b: ℚ, Decidable (a ≤ b) := sorry
 
-def ℚ.abs (a: ℚ): ℚ :=
+def abs (a: ℚ): ℚ :=
   if 0 ≤ a then a else -a
 
 theorem abs_eq (a: ℚ): ℚ.abs a = if 0 ≤ a then a else -a := by
@@ -55,14 +72,9 @@ theorem zero_le_abs (a: ℚ): 0 ≤ ℚ.abs a := by
   · rw [if_neg h]
     sorry
 
-def NNℚ.abs (a: ℚ): NNℚ :=
-  ⟨ℚ.abs a, zero_le_abs a⟩
-
-theorem abs_eq' (a: ℚ): NNℚ.abs a = ⟨if 0 ≤ a then a else -a, zero_le_abs a⟩ := by
-  rfl
-
 
 
 -- Embedding of ℤ in ℚ.
 
 instance: Coe ℤ ℚ := ⟨λ n ↦ Quotient.mk _ (n, ⟨1, ℤ.one_nonzero⟩)⟩
+instance (n: Nat): OfNat ℚ n := ⟨ℕ.fromNat n⟩

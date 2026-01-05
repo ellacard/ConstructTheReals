@@ -10,98 +10,53 @@ Properties of ℝ:
 
 -/
 
--- First, show ℚ₊ satisfies the necessary properties for a generalized metric space.
+-- Define a generalized metric space on ℚ.
 
-instance: Coe NNℚ ℚ := ⟨λ ⟨q, _⟩ ↦ q⟩
-
-instance: DistanceSpace NNℚ := {
-  le          := λ a b ↦ ℚ.Lattice.le a b
-  le_refl     := λ a ↦ ℚ.Lattice.reflexive a
-  le_trans    := λ a b c ↦ ℚ.Lattice.transitive a b c
-  le_antisymm := λ a b h₁ h₂ ↦ Subtype.ext (ℚ.Lattice.antisymmetric a b h₁ h₂)
-  bottom := ⟨0, ℚ.Lattice.reflexive 0⟩
-  bottom_le := λ ⟨_, ha⟩ ↦ ha
-  add := λ ⟨a, ha⟩ ⟨b, hb⟩ ↦ ⟨a + b, sorry⟩
-  add_assoc := by
-    intro ⟨a, ha⟩ ⟨b, hb⟩ ⟨c, hc⟩
-    simp
-    sorry
-  add_bottom := by
-    constructor
-    · intro ⟨_, _⟩
-      simp [add_zero_left]
-    · intro ⟨_, _⟩
-      simp [add_zero_right]
+instance: DistanceSpace ℚ := {
+  le          := ℚ.Lattice.le
+  le_refl     := ℚ.Lattice.reflexive
+  le_trans    := ℚ.Lattice.transitive
+  le_antisymm := ℚ.Lattice.antisymmetric
+  zero := 0
+  add := ℚ.Field.add
+  add_assoc := ℚ.Field.add_assoc
+  add_zero := ℚ.Field.add_zero
   le_add := by
-    intro ⟨a, ha⟩ ⟨b, hb⟩ ⟨c, hc⟩
-    simp
-    constructor
-    · intro h
-      sorry
-    · intro h
-      sorry
-}
-
-
-
--- Next, define a metric ℚ × ℚ → ℚ₊.
-
-instance ℚ.metric: Metric ℚ NNℚ := {
-  distance := λ a b ↦ NNℚ.abs (a - b)
-  distance_bot_iff := by
-    intro a b
-    constructor
-    · intro h
-      sorry
-    · intro h
-      sorry
-  distance_symm := by
-    intro a b
-    sorry
-  distance_triangle := by
     intro a b c
-    sorry
+    constructor
+    · intro h
+      apply ℚ.le_add_right
+      exact h
+    · intro h
+      apply ℚ.le_add_right' c
+      exact h
+  complete := by
+    intro a ⟨h₁, h₂⟩
+    exists a / 2
+    have two_neq_zero: (2: ℚ) ≠ 0 := by sorry
+    constructor
+    · constructor
+      · have temp₂: (0: ℚ) ≤ 2 := by sorry
+        exact ℚ.div_nonnegative_nonnegative h₁ temp₂ two_neq_zero
+      · exact Ne.symm (ℚ.div_nonzero (Ne.symm h₂) two_neq_zero)
+    · sorry
 }
 
-instance NNℚ.endometric: Endometric NNℚ := {
-  distance := λ a b ↦ ℚ.metric.distance a b
-  distance_bot_iff := sorry
-  distance_symm := λ a b ↦ ℚ.metric.distance_symm a b
-  distance_triangle := λ a b c ↦ ℚ.metric.distance_triangle a b c
+instance ℚ.metric: Metric ℚ ℚ := {
+  distance := λ a b ↦ ℚ.abs (a - b)
+  distance_le := λ a b ↦ zero_le_abs (a - b)
+  distance_zero_iff := sorry
+  distance_symm := sorry
+  distance_triangle := sorry
 }
 
-theorem dist_eq {a b: NNℚ}: NNℚ.endometric.distance a b = NNℚ.abs (a - b) := by
+theorem dist_eq {a b: ℚ}: ℚ.metric.distance a b = ℚ.abs (a - b) := by
   rfl
 
--- Show the metrics satisfy the necessary properties for the Cauchy sequence equivalence.
-
-theorem NNℚ.endometric_obedient: NNℚ.endometric.obedient := by
-  intro ⟨r, hr⟩
-  simp [dist_eq]
-  simp [sub_zero_right]
-  by_cases h: 0 ≤ r
-  · simp [abs_eq', if_pos h]
-  · contradiction
-
--- This is unnecessarily complicated? maybe we should do a less general metric?
-instance: Div NNℚ := ⟨sorry⟩
-instance: Coe ℕ NNℚ := ⟨sorry⟩
-
-theorem NNℚ.distance_complete: DistanceComplete NNℚ := by
-  intro a ha
-  --exists a / 2
-  sorry
-
-
-
--- Finally, define the real numbers as the quotient on cauchy sequences of rationals using the above metrics on ℚ.
+-- Define the real numbers as the quotient on cauchy sequences of rationals using the above metrics on ℚ.
 
 def Real: Type :=
-  CauchyRelation.quotient
-    NNℚ.distance_complete
-    NNℚ.endometric
-    NNℚ.endometric_obedient
-    ℚ.metric
+  CauchyRelation.quotient ℚ.metric
 
 abbrev ℝ: Type :=
   Real
@@ -110,6 +65,15 @@ abbrev ℝ: Type :=
 
 -- ℝ is a field.
 -- TODO this will take a lot of work..
+
+def add_cauchy (a b: CauchySet ℚ.metric): CauchySet ℚ.metric := by
+  sorry
+
+def add (a b: ℝ): ℝ :=
+  Quotient.liftOn₂ a b (λ a b ↦ Quotient.mk _ (add_cauchy a b))
+  ( by
+    sorry
+  )
 
 instance ℝ.Field: Field ℝ := {
   add := sorry
@@ -152,3 +116,10 @@ instance ℝ.Lattice: Lattice ℝ := {
 
 
 -- TODO More properties of ℝ
+
+
+
+-- Embedding of ℚ in ℝ.
+
+instance: Coe ℚ ℝ := ⟨λ n ↦ Quotient.mk _ ⟨ConstantSequence n, constant_sequence_cauchy⟩⟩
+instance (n: Nat): OfNat ℝ n := ⟨(ℕ.fromNat n)⟩
