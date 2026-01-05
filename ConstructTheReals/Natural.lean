@@ -362,9 +362,24 @@ theorem not_le_lt {a b: ℕ} (h: ¬a ≤ b): b < a := by
       have: k = 0 := by rw [add_cancel_left b this]
       contradiction
 
+theorem le_next (a: ℕ): a ≤ next a := by
+  exists 1
+
+theorem le_of_add_left_le {a b c : ℕ} (h : c + a ≤ b) : a ≤ b := by
+  induction c with
+  | zero =>
+    rw [zero_eq, add_zero_left] at h
+    exact h
+  | next p hp =>
+    apply hp
+    rw [add_next_left] at h
+    exact le_trans (le_next (p + a)) h
+
 instance: DecidableEq ℕ := sorry
 
 instance: ∀ a b: ℕ, Decidable (a ≤ b) := sorry
+
+instance: ∀ a b: ℕ, Decidable (a < b) := sorry
 
 
 
@@ -382,13 +397,6 @@ instance: Max ℕ := ⟨max⟩
 
 -- Min and max theorems.
 
-def min_symm (a b: ℕ): min a b = min b a := by
-  by_cases h: a ≤ b <;> simp_all [min]
-  exact le_antisymm h
-  intro
-  have := not_le_le h
-  contradiction
-
 theorem max_le_left (a b: ℕ): a ≤ max a b := by
   by_cases a ≤ b <;> simp_all [max]
   exact le_refl a
@@ -399,13 +407,19 @@ theorem max_le_right (a b: ℕ): b ≤ max a b := by
   exact not_le_le h
 
 theorem max_lub (a b c: ℕ) (h₁: a ≤ c) (h₂: b ≤ c): max a b ≤ c := by
-  by_cases h: a ≤ b
-  · rw [max, if_pos h]
-    exact h₂
-  · rw [max, if_neg h]
-    exact h₁
+  by_cases a ≤ b <;> simp_all [max]
 
+theorem min_le_left (a b: ℕ): min a b ≤ a := by
+  by_cases h: a ≤ b <;> simp_all [min]
+  exact le_refl a
+  exact not_le_le h
 
+theorem min_le_right (a b: ℕ): min a b ≤ b := by
+  by_cases a ≤ b <;> simp_all [min]
+  exact le_refl b
+
+theorem min_glb (a b c: ℕ) (h₁: c ≤ a) (h₂: c ≤ b): c ≤ min a b := by
+  by_cases a ≤ b <;> simp_all [min]
 
 -- Finally, define the lattice on ℕ.
 
@@ -417,10 +431,10 @@ instance Lattice: Lattice ℕ := {
   max := ℕ.max
   max_le_left := max_le_left
   max_le_right := max_le_right
-  max_lub := sorry
-  min_le_left := sorry
-  min_le_right := sorry
-  min_glb := sorry
+  max_lub := max_lub
+  min_le_left := min_le_left
+  min_le_right := min_le_right
+  min_glb := min_glb
 }
 
 
@@ -434,23 +448,32 @@ Subtraction of natural numbers, truncated at 0. If a result would be less than z
 
 -/
 
-instance: Sub ℕ := {
-  sub := sorry
-}
+def sub (a b: ℕ): ℕ :=
+  match a with
+  | 0 => 0
+  | next p => match b with
+    | 0 => next p
+    | next q => sub p q
+
+instance: Sub ℕ := ⟨sub⟩
 
 -- TODO Additional natural number theorems.
 
 theorem le_add_of_sub_le {a b c : ℕ} (h : a - b ≤ c) : a ≤ c + b := by
   sorry
 
-theorem le_of_add_left_le {n m k : ℕ} (h : k + n ≤ m) : n ≤ m := by
-  sorry
-
 theorem le_sub_of_add_le {a b c : ℕ} (h : a + b ≤ c) : a ≤ c - b := by
   sorry
 
-theorem sub_add_cancel {n m : ℕ} (h : m ≤ n) : n - m + m = n := by
+theorem sub_add_cancel {a b : ℕ} (h : b ≤ a) : a - b + b = a := by
   sorry
 
-theorem le_of_not_ge {a b : ℕ} : ¬a ≥ b → a ≤ b := by
-  sorry
+
+
+-- Convert numerals (1, 2, 3, ...) to type ℕ with an instance of OfNat.
+
+def fromNat: Nat → ℕ
+  | 0 => ℕ.zero
+  | n + 1 => ℕ.next (fromNat n)
+
+instance (n: Nat): OfNat ℕ n := ⟨fromNat n⟩

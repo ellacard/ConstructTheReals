@@ -41,3 +41,4 @@ instance ℤ.Lattice: Lattice ℤ :=
 -- Embedding of ℕ in ℤ.
 
 instance: Coe ℕ ℤ := ⟨λ n ↦ Quotient.mk _ (n, ⟨0, trivial⟩)⟩
+instance (n: Nat): OfNat ℤ n := ⟨ℕ.fromNat n⟩
